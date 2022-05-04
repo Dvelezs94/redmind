@@ -22,10 +22,10 @@ nn = NeuralNetwork([
 
 - [X] Classes definition and construction
 - [X] Forward propagation fully working
-- [] Backward propagation working
-- [] Train and predict fully working
-- [] Add Optimization layers
-- [] Add convolutional layers
-- [] Add batch support for SGD
-- [] Add native pyplot support
-- [] Add CUDA support??
+- [ ] Backward propagation working
+- [ ] Train and predict fully working
+- [ ] Add Optimization layers
+- [ ] Add convolutional layers
+- [ ] Add batch support for SGD
+- [ ] Add native pyplot support
+- [ ] Add CUDA support??
