@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 class Layer(ABC):
+    """
+    Base layer class.
+
+    All layers must inherit from this class
+    because the NN works with Layer objects
+    """
     forward_inputs = None
     forward_outputs = None
     backward_inputs = None
@@ -20,11 +26,7 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def backward(self, output_gradient):
-        pass
-
-    @abstractmethod
-    def update_params(self, learning_rate):
+    def backward(self, output_gradient, learning_rate):
         pass
 
 
@@ -47,11 +49,21 @@ class Dense(Layer):
         self.forward_outputs = np.dot(self.weights, self.forward_inputs) + self.bias
         return self.forward_outputs
 
-    def backward(self, output_gradient):
-        pass
+    def backward(self, output_gradient, learning_rate):
+        self.backward_inputs = output_gradient
+        self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
+        self.update_params(learning_rate)
+        return self.backward_outputs
 
-    def update_params(self, learning_rate):
-        pass
+    def update_params(self, learning_rate) -> None:
+        # compute w gradient
+        self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
+        # compute b gradient
+        self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)/self.backward_inputs.shape[1]
+        # update w and b with gradient descent 
+        self.weights -= self.weights_prime * learning_rate
+        self.bias -= self.bias_prime * learning_rate
+        return None
 
 ###################
 # Activation Layers
@@ -66,14 +78,12 @@ class ActivationLayer(Layer):
     def forward(self, x):
         self.forward_inputs = x
         self.forward_outputs = self.activation(self.forward_inputs)
-        #print(self.forward_outputs)
         return self.forward_outputs
 
-    def backward(self, output_gradient):
-        pass
-
-    def update_params(self, learning_rate):
-        pass
+    def backward(self, output_gradient, *kwargs):
+        self.backward_inputs = output_gradient
+        self.backward_outputs = self.activation_prime(self.backward_inputs)
+        return self.backward_outputs
 
 class Sigmoid(ActivationLayer):
     def __init__(self) -> None:

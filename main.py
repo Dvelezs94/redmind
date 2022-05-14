@@ -23,8 +23,9 @@ def main() -> None:
             Sigmoid()
         ])
         
-    nn.train(epochs = 1, x = x_test, Y = y)
-    # nn.details()
+    nn.train(epochs = 200, x = x_test, Y = y)
+    #nn.details()
+    #nn.graph_costs()
 
 if __name__ == "__main__":
     main()
