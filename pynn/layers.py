@@ -37,11 +37,11 @@ class Dense(Layer):
     weights_prime = None
 
     def __init__(self, n_rows, n_columns):
-        self.weights = np.random.randn(n_rows, n_columns) * 0.01
+        self.weights = np.random.randn(n_rows, n_columns) * 0.1
         self.bias = np.zeros((n_rows, 1))
 
     def __repr__(self):
-        fields = {'bias': self.bias}
+        fields = {'weights': self.weights, 'bias': self.bias}
         return super().__repr__(extra_fields = fields)
 
     def forward(self, x):
@@ -57,10 +57,10 @@ class Dense(Layer):
 
     def update_params(self, learning_rate) -> None:
         # compute w gradient
-        self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
+        self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T) / self.forward_inputs.shape[1]
         # compute b gradient
-        self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)/self.backward_inputs.shape[1]
-        # update w and b with gradient descent 
+        self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True) / self.forward_inputs.shape[1]
+        # update w and b with gradient descent
         self.weights -= self.weights_prime * learning_rate
         self.bias -= self.bias_prime * learning_rate
         return None
@@ -70,17 +70,16 @@ class Dense(Layer):
 ###################
 
 class ActivationLayer(Layer):
-
     def __init__(self, activation, activation_prime) -> None:
         self.activation = activation
         self.activation_prime = activation_prime
 
-    def forward(self, x):
+    def forward(self, x) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = self.activation(self.forward_inputs)
         return self.forward_outputs
 
-    def backward(self, output_gradient, *kwargs):
+    def backward(self, output_gradient, *kwargs) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = self.activation_prime(self.backward_inputs)
         return self.backward_outputs

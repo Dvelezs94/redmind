@@ -1,6 +1,6 @@
 import numpy as np
 
-def mse(y_pred, y):
+def mse(y, y_pred):
     """
     Calculates difference between predicted value and actual value
     and squares them (Mean Squared Error)
@@ -17,5 +17,5 @@ def mse(y_pred, y):
     """
     return np.mean(np.power(y - y_pred, 2))
 
-def mse_prime(y_pred, y):
-    return 2 * (y_pred - y) / np.size(y)
+def mse_prime(y, y_pred):
+    return 2 * (y - y_pred)
