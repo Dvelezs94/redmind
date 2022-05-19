@@ -1,20 +1,13 @@
 import numpy as np
 
+def mse(y, y_pred):
+    return np.mean(np.power(y_pred - y, 2))
 
-import numpy as np
+def mse_prime(y, y_pred):
+    return 2 * (y_pred - y) / np.size(y)
 
-def cross_entropy_loss(y_pred, y):
-    """Cros entropy loss calculation"""
-    logprobs = np.multiply(np.log(y_pred), y) + np.multiply((1 - y), np.log(1 - y_pred))
-    # loss = -np.mean(logprobs)
-    return logprobs
+def binary_cross_entropy(y ,y_pred):
+    return np.mean(-y * np.log(y_pred) - (1 - y) * np.log(1 - y_pred))
 
-def binary_cross_entropy():
-    pass
-
-
-def mse(y_pred, y):
-    return np.mean(np.power(y - y_pred, 2))
-
-def mse_prime(y_pred, y):
-    return 2 / (y - y_pred)  / np.size(y)
+def binary_cross_entropy_prime(y, y_pred):
+    return ((1 - y) / (1 - y_pred) - y / y_pred) / np.size(y)

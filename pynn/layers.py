@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 class Layer(ABC):
+    """
+    Base layer class.
+
+    All layers must inherit from this class
+    because the NN works with Layer objects
+    """
     forward_inputs = None
     forward_outputs = None
     backward_inputs = None
@@ -20,11 +26,7 @@ class Layer(ABC):
         pass
 
     @abstractmethod
-    def backward(self, output_gradient):
-        pass
-
-    @abstractmethod
-    def update_params(self, learning_rate):
+    def backward(self, output_gradient, learning_rate):
         pass
 
 
@@ -34,46 +36,53 @@ class Dense(Layer):
     bias_prime = None
     weights_prime = None
 
-    def __init__(self, n_rows, n_columns):
-        self.weights = np.random.randn(n_rows, n_columns) * 0.01
-        self.bias = np.zeros((n_rows, 1))
+    def __init__(self, n_rows, n_columns) -> None:
+        self.weights = np.random.randn(n_rows, n_columns) * 0.1
+        self.bias = np.random.randn(n_rows, 1)
 
     def __repr__(self):
-        fields = {'bias': self.bias}
+        fields = {'weights': self.weights, 'bias': self.bias}
         return super().__repr__(extra_fields = fields)
 
-    def forward(self, x):
+    def forward(self, x) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = np.dot(self.weights, self.forward_inputs) + self.bias
         return self.forward_outputs
 
-    def backward(self, output_gradient):
-        pass
+    def backward(self, output_gradient, learning_rate) -> np.ndarray:
+        self.backward_inputs = output_gradient
+        self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
+        self.update_params(learning_rate)
+        return self.backward_outputs
 
-    def update_params(self, learning_rate):
-        pass
+    def update_params(self, learning_rate) -> None:
+        # compute w gradient
+        self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
+        # compute b gradient
+        self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)
+        # update w and b
+        self.weights = self.weights - (self.weights_prime * learning_rate)
+        self.bias = self.bias - (self.bias_prime * learning_rate)
+        return None
 
 ###################
 # Activation Layers
 ###################
 
 class ActivationLayer(Layer):
-
     def __init__(self, activation, activation_prime) -> None:
         self.activation = activation
         self.activation_prime = activation_prime
 
-    def forward(self, x):
+    def forward(self, x) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = self.activation(self.forward_inputs)
-        #print(self.forward_outputs)
         return self.forward_outputs
 
-    def backward(self, output_gradient):
-        pass
-
-    def update_params(self, learning_rate):
-        pass
+    def backward(self, output_gradient, *kwargs) -> np.ndarray:
+        self.backward_inputs = output_gradient
+        self.backward_outputs = self.backward_inputs * self.activation_prime(self.forward_inputs)
+        return self.backward_outputs
 
 class Sigmoid(ActivationLayer):
     def __init__(self) -> None:
