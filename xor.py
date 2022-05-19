@@ -22,11 +22,11 @@ def main() -> None:
             Dense(n_weights_2, n_weights_1),
             Sigmoid()
         ])
-        
-    nn.train(epochs = 1000, x = x_test, Y = y, learning_rate=0.01)
+
+    nn.train(epochs = 10000, x = x_test, Y = y, learning_rate=0.5)
     print(nn.predict(np.array([[1],[0]])))
-    # nn.details()
-    # nn.graph_costs()
+    #nn.details()
+    #nn.graph_costs()
 
 if __name__ == "__main__":
     main()

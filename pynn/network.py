@@ -14,9 +14,9 @@ class NeuralNetwork:
 
     def details(self) -> None:
         for index, layer in enumerate(self.layers):
-            print(f"Layer {index +1} {layer}")
+            print(f"Layer {index + 1} {layer}")
 
-    def forward(self, x) -> np.ndarray:
+    def predict(self, x) -> np.ndarray:
         out = x
         for layer in self.layers:
             out = layer.forward(out)
@@ -29,24 +29,22 @@ class NeuralNetwork:
         return None
 
     
-    def train(self, epochs, x, Y, learning_rate=0.01):
+    def train(self, epochs, x, Y, learning_rate=0.01, verbose=True):
         for epoch in range(epochs):
             # forward
-            y_pred = self.forward(x)
+            y_pred = self.predict(x)
             # calculate error and cost
-            error = fn.mse(Y, y_pred)
-            self.costs[epoch] = error
+            cost = fn.mse(Y, y_pred)
+            self.costs[epoch] = cost
             error_gradient = fn.mse_prime(Y, y_pred)
             # backward
             self.backward(error_gradient, learning_rate)
             # print cost to console
-            print(f"epoch: {epoch + 1}/{epochs}, cost: {self.costs[epoch]}")
+            if verbose:
+                print(f"epoch: {epoch + 1}/{epochs}, cost: {self.costs[epoch]}")
 
     def graph_costs(self) -> None:
         plt.plot(list(self.costs.keys()), list(self.costs.values()))
         plt.xlabel("Epoch")
         plt.ylabel("Cost")
         plt.show()
-
-    def predict(self, x) -> np.ndarray:
-        return self.forward(x)
