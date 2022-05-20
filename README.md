@@ -3,8 +3,6 @@
 This is a python library made to help you build machine learning models.
 
 ## Quickstart
-lll
-
 
 ```python
 from pynn.layers import Dense, Sigmoid
