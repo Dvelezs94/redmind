@@ -26,7 +26,7 @@ def main() -> None:
     nn.train(epochs = 10000, x = x_test, Y = y, learning_rate=0.5)
     print(nn.predict(np.array([[1],[0]])))
     #nn.details()
-    #nn.graph_costs()
+    nn.graph_costs()
 
 if __name__ == "__main__":
     main()
