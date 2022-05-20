@@ -20,25 +20,26 @@ def prepare_mnist_data():
     # test set
     test_set_batch=datasets.MNIST('datasets/',train=False, download=True)
     X_test_unflattened = test_set_batch.data.numpy()
-    X_test = [image.ravel()/255 for image in X_test_unflattened]
+    X_test = np.array([image.ravel()/255 for image in X_test_unflattened])
     Y_test = np.array([one_hot_encode(i, 10) for i in test_set_batch.targets.numpy()])
 
-    return X_train_unflattened, X_train, Y_train, X_test_unflattened, X_test, Y_test
+    return X_train, Y_train, X_test, Y_test
 
-def plot_image(x, y) -> None:
+def plot_image(x, title) -> None:
     image = x
     fig = plt.figure
     plt.imshow(image, cmap='gray')
-    plt.title(f"Number: {y}")
+    plt.title(title)
     plt.show()
 
 
 def main() -> None:
 
-    X_train_unflattened, X_train, Y_train, X_test_unflattened, X_test, Y_test = prepare_mnist_data()
+    X_train, Y_train, X_test, Y_test = prepare_mnist_data()
     # Generate Dataloader object with X and Y as column vectors
-    data = Dataloader(X_train.T, Y_train.T, 1)
-    
+    train_data = Dataloader(X_train.T, Y_train.T, 1)
+    test_data = Dataloader(X_test.T, Y_test.T, 1)
+
     n_neurons_l1 = 100
     n_neurons_l2 = 100
     n_neurons_l3 = 10 # 10 output classes
@@ -53,14 +54,14 @@ def main() -> None:
         ])
 
     # batch training
-    for x, y in data:
+    for x, y in train_data:
        nn.train(epochs = 100, x = x, Y = y, learning_rate=0.5)
     # nn.graph_costs()
 
     # predict random number
-    rand_x, rand_y = data.get_random_element()
-    print(nn.predict(rand_x.reshape(784,1)))
-    plot_image(rand_x.reshape(28,28), rand_y)
+    rand_x, rand_y = test_data.get_random_element()
+    prediction = nn.predict(rand_x.reshape(784,1))
+    plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
 
 if __name__ == "__main__":
     main()

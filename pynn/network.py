@@ -16,7 +16,7 @@ class NeuralNetwork:
         for index, layer in enumerate(self.layers):
             print(f"Layer {index + 1} {layer}")
 
-    def predict(self, x) -> np.ndarray:
+    def forward(self, x) -> np.ndarray:
         out = x
         for layer in self.layers:
             out = layer.forward(out)
@@ -28,11 +28,13 @@ class NeuralNetwork:
             grad = layer.backward(grad, learning_rate)
         return None
 
-    
+    def predict(self, x):
+        return self.forward(x).reshape(-1)
+
     def train(self, epochs, x, Y, learning_rate=0.01, verbose=True):
         for epoch in range(epochs):
             # forward
-            y_pred = self.predict(x)
+            y_pred = self.forward(x)
             # calculate error and cost
             cost = fn.binary_cross_entropy(Y, y_pred)
             self.costs[epoch] = cost
@@ -41,7 +43,7 @@ class NeuralNetwork:
             self.backward(error_gradient, learning_rate)
             # print cost to console
             if verbose:
-                print(f"epoch: {epoch + 1}/{epochs}, cost: {self.costs[epoch]}")
+                print(f"epoch: {epoch + 1}/{epochs}, cost: {round(self.costs[epoch], 4)}, accuracy: {round(100 - (self.costs[epoch] * 100), 2)}%")
 
     def graph_costs(self) -> None:
         plt.plot(list(self.costs.keys()), list(self.costs.values()))
