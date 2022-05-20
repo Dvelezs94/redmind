@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Dataloader():
     """
@@ -58,3 +59,8 @@ class Dataloader():
         assert self.X.shape[1] % self.n_batches == 0, f"X({self.X.shape[1]}) is not divisible by {self.n_batches}"
         assert self.Y.shape[1] % self.n_batches == 0, f"X({self.Y.shape[1]}) is not divisible by {self.n_batches}"
     
+    def get_random_element(self):
+        elem = random.randint(0, len(self))
+        x = self.X[:, elem].reshape(self.X.shape[0], 1)
+        y = self.Y[:, elem]
+        return x, y

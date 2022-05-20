@@ -34,9 +34,9 @@ class NeuralNetwork:
             # forward
             y_pred = self.predict(x)
             # calculate error and cost
-            cost = fn.mse(Y, y_pred)
+            cost = fn.binary_cross_entropy(Y, y_pred)
             self.costs[epoch] = cost
-            error_gradient = fn.mse_prime(Y, y_pred)
+            error_gradient = fn.binary_cross_entropy_prime(Y, y_pred)
             # backward
             self.backward(error_gradient, learning_rate)
             # print cost to console
