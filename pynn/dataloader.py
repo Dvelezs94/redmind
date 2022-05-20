@@ -3,13 +3,12 @@ import random
 
 class Dataloader():
     """
-    Dataloader class utilized to create lists of labeled numpy matrices
+    Dataloader class utilized to create iterable lists of labeled numpy matrices
     
     Each iteration on the dataloader object returns a matrix containing 
     features and labeled outputs for those features
 
     Warning: Make sure you input both X and Y as column vectors
-
     """
     X: np.ndarray    
     Y: np.ndarray
@@ -17,13 +16,13 @@ class Dataloader():
     batch_size: int
     index: int = 0
 
-    def __init__(self, X, Y, n_batches):
+    def __init__(self, X, Y, n_batches=1):
         """
         inputs
         ---
         X: Matrix of features X as column vectors
         Y: Output labels Y as column vectors
-        n_batches: number of batches you want to have for the entire data
+        n_batches: number of batches you want to have for the entire data. defaults to 1
         """
         self.X = X
         self.Y = Y
@@ -60,6 +59,9 @@ class Dataloader():
         assert self.Y.shape[1] % self.n_batches == 0, f"X({self.Y.shape[1]}) is not divisible by {self.n_batches}"
     
     def get_random_element(self):
+        """
+        Returns a random element with its features and label
+        """
         elem = random.randint(0, len(self))
         x = self.X[:, elem].reshape(self.X.shape[0], 1)
         y = self.Y[:, elem]
