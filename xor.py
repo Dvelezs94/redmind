@@ -16,14 +16,14 @@ def main() -> None:
     
     n_weights_1 = 3 # 3 neurons in the first layer
     n_weights_2 = 1 # 1 neuron in the second layer (output)
-    nn = NeuralNetwork([
+    nn = NeuralNetwork(layers=[
             Dense(n_weights_1, x_test.shape[0]),
             Sigmoid(),
             Dense(n_weights_2, n_weights_1),
             Sigmoid()
         ])
 
-    nn.train(epochs = 10000, x = x_test, Y = y, learning_rate=0.5)
+    nn.train(X = x_test, Y = y, epochs = 10000, learning_rate=0.5)
     prediction_vector = nn.predict(np.array([[0],[1]]))
     if prediction_vector > 0.5:
         print(1)
