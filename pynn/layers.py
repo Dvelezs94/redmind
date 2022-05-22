@@ -88,7 +88,6 @@ class Dropout(Layer):
         self.backward_outputs = output_gradient
         return self.backward_outputs
 
-
 ###################
 # Activation Layers
 ###################
