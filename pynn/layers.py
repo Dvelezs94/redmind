@@ -52,10 +52,10 @@ class Dense(Layer):
     def backward(self, output_gradient: float = None, learning_rate: float = None) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
-        self.update_params(learning_rate)
+        self.update_params(learning_rate=learning_rate)
         return self.backward_outputs
 
-    def update_params(self, learning_rate: float = 0.01) -> None:
+    def update_params(self, learning_rate: float = 0.1) -> None:
         # compute gradients
         self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
         self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)
@@ -65,8 +65,6 @@ class Dense(Layer):
         return None
 
 class Dropout(Layer):
-    drop_rate: float = 0.0
-
     def __init__(self, drop_rate: float = 0) -> None:
         assert 0 <= drop_rate <= 1, "Drop rate should be between 0 and 1"
         self.drop_rate = drop_rate

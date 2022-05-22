@@ -46,7 +46,7 @@ def main() -> None:
     nn = NeuralNetwork(layers=[
             Dense(n_neurons_l1, 784),
             ReLU(),
-            Dropout(0),
+            Dropout(0.1),
             Dense(n_neurons_l2, n_neurons_l1),
             ReLU(),
             Dense(n_neurons_l3, n_neurons_l2),
@@ -55,7 +55,7 @@ def main() -> None:
 
     # batch training
     for x, y in train_data:
-       nn.train(X = x, Y = y, epochs = 100, learning_rate=0.5)
+       nn.train(X = x, Y = y, epochs = 1000, learning_rate=0.5)
     # nn.graph_costs()
 
     # predict random number

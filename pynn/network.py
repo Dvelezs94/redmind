@@ -31,7 +31,7 @@ class NeuralNetwork:
     def predict(self, x: np.ndarray = None):
         return self.forward(x).reshape(-1)
 
-    def train(self, X=None, Y=None, epochs=100, learning_rate=0.01, verbose=True):
+    def train(self, X=None, Y=None, epochs=100, learning_rate=0.1, verbose=True):
         for epoch in range(epochs):
             # forward
             y_pred = self.forward(x=X)
