@@ -3,14 +3,13 @@ MNIST implementation with pynn
 """
 from torchvision import datasets
 import matplotlib.pyplot as plt
-import random
 import numpy as np
-from pynn.layers import Dense, Sigmoid, ReLU
+from pynn.layers import Dense, Dropout, Sigmoid, ReLU
 from pynn.network import NeuralNetwork
 from pynn.dataloader import Dataloader
 from pynn.utils import one_hot_encode
 
-def prepare_mnist_data():
+def fetch_mnist_data():
     # training set
     traininig_set_batch=datasets.MNIST('datasets/',train=True, download=True)
     X_train_unflattened = traininig_set_batch.data.numpy()
@@ -27,7 +26,7 @@ def prepare_mnist_data():
 
 def plot_image(x, title) -> None:
     image = x
-    fig = plt.figure
+    #fig = plt.figure
     plt.imshow(image, cmap='gray')
     plt.title(title)
     plt.show()
@@ -35,7 +34,7 @@ def plot_image(x, title) -> None:
 
 def main() -> None:
 
-    X_train, Y_train, X_test, Y_test = prepare_mnist_data()
+    X_train, Y_train, X_test, Y_test = fetch_mnist_data()
     # Generate Dataloader object with X and Y as column vectors
     train_data = Dataloader(X_train.T, Y_train.T, 1)
     test_data = Dataloader(X_test.T, Y_test.T, 1)
@@ -44,9 +43,10 @@ def main() -> None:
     n_neurons_l2 = 100
     n_neurons_l3 = 10 # 10 output classes
 
-    nn = NeuralNetwork([
+    nn = NeuralNetwork(layers=[
             Dense(n_neurons_l1, 784),
             ReLU(),
+            Dropout(0),
             Dense(n_neurons_l2, n_neurons_l1),
             ReLU(),
             Dense(n_neurons_l3, n_neurons_l2),
@@ -55,7 +55,7 @@ def main() -> None:
 
     # batch training
     for x, y in train_data:
-       nn.train(epochs = 100, x = x, Y = y, learning_rate=0.5)
+       nn.train(X = x, Y = y, epochs = 100, learning_rate=0.5)
     # nn.graph_costs()
 
     # predict random number
