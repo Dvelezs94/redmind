@@ -10,12 +10,6 @@ class Dataloader():
 
     Warning: Make sure you input both X and Y as column vectors
     """
-    X: np.ndarray    
-    Y: np.ndarray
-    n_batches: int
-    batch_size: int
-    index: int = 0
-
     def __init__(self, X, Y, n_batches=1):
         """
         inputs
@@ -29,6 +23,7 @@ class Dataloader():
         self.n_batches = n_batches
         self.validate_data()
         self.batch_size = int(self.X.shape[1] / self.n_batches)
+        self.iter_index = 0
 
     def __iter__(self):
         return self
@@ -37,12 +32,12 @@ class Dataloader():
         return self.X.shape[1]
 
     def __next__(self):
-        position = self.index * self.batch_size
+        position = self.iter_index * self.batch_size
         if position >= len(self):
             raise StopIteration
         x = self.X[:, position:position+self.batch_size]
         y = self.Y[:, position:position+self.batch_size]
-        self.index += 1
+        self.iter_index += 1
         return x, y
 
     def __repr__(self):
