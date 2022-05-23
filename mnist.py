@@ -44,14 +44,15 @@ def main() -> None:
     n_neurons_l3 = 10 # 10 output classes
 
     nn = NeuralNetwork(layers=[
-            Dense(n_neurons_l1, 784),
+            Dense(n_neurons_l1, 784, weight_init_scale=np.sqrt(2/784)),
             ReLU(),
-            Dropout(0.1),
-            Dense(n_neurons_l2, n_neurons_l1),
+            #Dropout(0.1),
+            Dense(n_neurons_l2, n_neurons_l1, weight_init_scale=np.sqrt(2/n_neurons_l1)),
             ReLU(),
-            Dense(n_neurons_l3, n_neurons_l2),
+            Dense(n_neurons_l3, n_neurons_l2, weight_init_scale=np.sqrt(2/n_neurons_l2)),
             Sigmoid()
         ])
+    nn.set_verbose(state=True)
 
     # batch training
     for x, y in train_data:

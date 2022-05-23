@@ -14,6 +14,7 @@ class Layer(ABC):
         self.forward_outputs = None
         self.backward_inputs = None
         self.backward_outputs = None
+        self._train = False
 
     def __repr__(self, extra_fields = {}):
         return str({'Type:': type(self).__name__, 
@@ -24,17 +25,23 @@ class Layer(ABC):
                 **extra_fields})
     
     @abstractmethod
-    def forward(self, x: np.ndarray = None):
+    def forward(self, x: np.ndarray = None, **kwargs):
         pass
 
     @abstractmethod
-    def backward(self, output_gradient: float = None, learning_rate: float = None, **kwargs):
+    def backward(self, output_gradient: float = None, **kwargs):
         pass
 
+    def get_train(self):
+        return self._train
+
+    def set_train(self, state):
+        assert type(state) == bool
+        self._train = state
 
 class Dense(Layer):
-    def __init__(self, n_rows: int = None, n_columns: int = None) -> None:
-        self.weights = np.random.randn(n_rows, n_columns) * 0.1
+    def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1) -> None:
+        self.weights = np.random.randn(n_rows, n_columns) * weight_init_scale
         self.bias = np.random.randn(n_rows, 1)
         self.bias_prime = None
         self.weights_prime = None
@@ -44,15 +51,15 @@ class Dense(Layer):
         fields = {'weights': self.weights, 'bias': self.bias}
         return super().__repr__(extra_fields = fields)
 
-    def forward(self, x: np.ndarray = None) -> np.ndarray:
+    def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = np.dot(self.weights, self.forward_inputs) + self.bias
         return self.forward_outputs
 
-    def backward(self, output_gradient: float = None, learning_rate: float = None) -> np.ndarray:
+    def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
-        self.update_params(learning_rate=learning_rate)
+        self.update_params(learning_rate=kwargs['learning_rate'])
         return self.backward_outputs
 
     def update_params(self, learning_rate: float = 0.1) -> None:
@@ -65,27 +72,30 @@ class Dense(Layer):
         return None
 
 class Dropout(Layer):
-    def __init__(self, drop_rate: float = 0) -> None:
-        assert 0 <= drop_rate <= 1, "Drop rate should be between 0 and 1"
-        self.drop_rate = drop_rate
+    def __init__(self, drop_prob: float = 0) -> None:
+        assert 0 <= drop_prob <= 1, "Drop rate should be between 0 and 1"
+        self.drop_prob = drop_prob
         super().__init__()
 
     def __repr__(self):
         fields = {'weights': self.weights}
         return super().__repr__(extra_fields = fields)
 
-    def forward(self, x: np.ndarray = None, training=True) -> np.ndarray:
+    def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
         self.forward_inputs = x
-        prob = [self.drop_rate, 1 - self.drop_rate]
-        if not training:
+        prob = [self.drop_prob, 1 - self.drop_prob]
+        if not self._train:
             prob = [0, 1]
-        drop_matrix = np.random.choice([0, 1], size=x.shape, p=prob)
-        self.forward_outputs = np.multiply(drop_matrix, self.forward_inputs)
+        self.drop_matrix = np.random.choice([0, 1], size=x.shape, p=prob)
+        self.forward_outputs = np.multiply(self.drop_matrix, self.forward_inputs) / 1 - self.drop_prob
         return self.forward_outputs
 
     def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
         self.backward_inputs = output_gradient
-        self.backward_outputs = output_gradient
+        if not self._train:
+            self.backward_outputs = output_gradient
+        else:
+            self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / 1 - self.drop_prob
         return self.backward_outputs
 
 ###################
@@ -98,7 +108,7 @@ class ActivationLayer(Layer):
         self.activation_prime = activation_prime
         super().__init__()
 
-    def forward(self, x) -> np.ndarray:
+    def forward(self, x, **kwargs) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = self.activation(self.forward_inputs)
         return self.forward_outputs
