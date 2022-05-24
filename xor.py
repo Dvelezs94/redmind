@@ -2,6 +2,8 @@ import numpy as np
 
 from pynn.layers import Dense, Sigmoid, ReLU
 from pynn.network import NeuralNetwork
+import pynn.functions as fn
+from pynn.functions import mse_prime
 
 def main() -> None:
 
@@ -14,23 +16,25 @@ def main() -> None:
     
     x_test = xor.T
     
-    n_weights_1 = 3 # 3 neurons in the first layer
+    n_weights_1 = 10 # 3 neurons in the first layer
     n_weights_2 = 1 # 1 neuron in the second layer (output)
     nn = NeuralNetwork(layers=[
             Dense(n_weights_1, x_test.shape[0]),
             Sigmoid(),
             Dense(n_weights_2, n_weights_1),
             Sigmoid()
-        ])
+        ], cost_function=fn.mse, grad_function=mse_prime)
+    nn.set_verbose(True)
+    nn.train(X = x_test, Y = y, epochs = 5000, learning_rate=0.5)
+    prediction_vector = nn.predict(np.array([[0],[0]]))
+    # if prediction_vector > 0.5:
+    #     print(1)
+    # else:
+    #     print(0)
 
-    nn.train(X = x_test, Y = y, epochs = 10000, learning_rate=0.5)
-    prediction_vector = nn.predict(np.array([[0],[1]]))
-    if prediction_vector > 0.5:
-        print(1)
-    else:
-        print(0)
     #nn.details()
     #nn.graph_costs()
+    #nn.grad_check()
 
 if __name__ == "__main__":
     main()
