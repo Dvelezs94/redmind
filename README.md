@@ -24,7 +24,8 @@ nn = NeuralNetwork([
 - [X] Forward propagation fully working
 - [X] Backward propagation working
 - [X] Train and predict fully working
-- [ ] Add Optimization layers
+- [X] Add Optimization layers
+- [ ] Add Gradient checking
 - [ ] Add convolutional layers
 - [ ] Add batch support for SGD
 - [ ] Add native pyplot support
