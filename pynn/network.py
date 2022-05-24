@@ -1,14 +1,16 @@
-from pynn.layers import Layer
+from pynn.layers import Layer, Dense
 import numpy as np
 import pynn.functions as fn
 import matplotlib.pyplot as plt
 from typing import List
 
 class NeuralNetwork:
-    def __init__(self, layers: List[Layer], verbose=False) -> None:
+    def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime) -> None:
         self.layers = layers
         self.costs = {}
         self._verbose = verbose
+        self.cost_function = cost_function
+        self.grad_function = grad_function
         if self._verbose:
             print(f"Neural Network initialized with {len(self.layers)} layers")
 
@@ -47,9 +49,9 @@ class NeuralNetwork:
             # forward
             y_pred = self.forward(x=X)
             # calculate error and cost
-            cost = fn.binary_cross_entropy(Y, y_pred)
+            cost = self.cost_function(Y, y_pred)
             self.costs[epoch] = cost
-            error_gradient = fn.binary_cross_entropy_prime(Y, y_pred)
+            error_gradient = self.grad_function(Y, y_pred)
             # backward
             self.backward(gradient=error_gradient, learning_rate=learning_rate)
             # print cost to console
@@ -61,3 +63,82 @@ class NeuralNetwork:
         plt.xlabel("Epoch")
         plt.ylabel("Cost")
         plt.show()
+
+    
+    # PENDING CORRECT IMPLEMENTATION
+    # def grad_check(self, X=None, Y=None, epsilon=1e-7):
+    #     """
+    #     Performs gradient checking and returns the norm of difference / norm of the sum (scalar)
+    #     """
+    #     # get weights and biases on Dense layers only
+    #     dense_weights = np.empty(0)
+    #     dense_bias = np.empty(0)
+
+    #     for layer in self.layers:
+    #         if isinstance(layer, Dense):
+    #             dense_weights = np.append(dense_weights, layer.weights.ravel())
+    #             dense_bias = np.append(dense_bias, layer.bias.ravel())
+    #     parameters = np.concatenate((dense_weights, dense_bias))
+    #     if self._verbose:
+    #         print(parameters)
+
+    #     # Get gradients for all layers
+    #     network_grads = np.empty(0)
+        
+    #     for layer in self.layers:
+    #         layer_grad = layer.get_gradients()
+    #         for k, v in layer_grad.items():
+    #             assert type(v) == np.ndarray, "Element must be a numpy array"
+    #             network_grads = np.append(network_grads, v.ravel())
+    #     if self._verbose:
+    #         print(network_grads)
+
+    #     num_parameters = parameters.shape[0]
+    #     J_plus = np.zeros((num_parameters, 1))
+    #     J_minus = np.zeros((num_parameters, 1))
+    #     gradapprox = np.zeros((num_parameters, 1))
+
+    #     for i in range(num_parameters):
+    #         # Thetaplus
+    #         # add epsilon to weights and biases in dense layers
+    #         for layer in self.layers:
+    #             if isinstance(layer, Dense):
+    #                 layer.modify_weights_and_biases(val=epsilon)
+    #         J_plus[i] = self.cost_function(Y, self.predict(x=X))
+
+    #         for layer in self.layers:
+    #             if isinstance(layer, Dense):
+    #                 layer.modify_weights_and_biases(val=-epsilon)
+
+    #         # Thetaminus
+    #         # subtract epsilon to weights and biases in dense layers
+    #         for layer in self.layers:
+    #             if isinstance(layer, Dense):
+    #                 layer.modify_weights_and_biases(val=-epsilon)
+
+    #         J_minus[i] = self.cost_function(Y, self.predict(x=X))
+    #         for layer in self.layers:
+    #             if isinstance(layer, Dense):
+    #                 layer.modify_weights_and_biases(val=epsilon)
+
+    #         gradapprox[i] = (J_plus[i] - J_minus[i]) / (2 * epsilon)
+
+    #     print(J_plus)
+    #     print("---")
+    #     print(J_minus)
+        
+    #     print(gradapprox)
+    #     numerator = np.linalg.norm(network_grads - gradapprox)
+    #     denominator = np.linalg.norm(network_grads) + np.linalg.norm(gradapprox)
+    #     difference = numerator / denominator
+        
+    #     # YOUR CODE ENDS HERE
+    #     if self._verbose:
+    #         if difference > 2e-7:
+    #             print ("\033[93m" + "There is a mistake in the backward propagation! difference = " + str(difference) + "\033[0m")
+    #         else:
+    #             print ("\033[92m" + "Your backward propagation works perfectly fine! difference = " + str(difference) + "\033[0m")
+
+    #     return difference
+
+

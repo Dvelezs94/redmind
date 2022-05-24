@@ -39,6 +39,13 @@ class Layer(ABC):
         assert type(state) == bool
         self._train = state
 
+    @abstractmethod
+    def get_gradients():
+        """
+        This should return all the gradients as dictionary
+        """
+        pass
+    
 class Dense(Layer):
     def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1) -> None:
         self.weights = np.random.randn(n_rows, n_columns) * weight_init_scale
@@ -71,16 +78,19 @@ class Dense(Layer):
         self.bias = self.bias - (self.bias_prime * learning_rate)
         return None
 
+    def get_gradients(self):
+        return {'dW': self.weights_prime, 'db': self.bias_prime, 'dZ': self.backward_outputs}
+
+    def modify_weights_and_biases(self, val=0):
+        self.weights += val
+        self.bias += val
+
 class Dropout(Layer):
     def __init__(self, drop_prob: float = 0) -> None:
         assert 0 <= drop_prob < 1, "Drop probability rate should be between 0 and 0.9"
         self.drop_prob = drop_prob
         self.keep_prob = 1 - self.drop_prob
         super().__init__()
-
-    def __repr__(self):
-        fields = {'weights': self.weights}
-        return super().__repr__(extra_fields = fields)
 
     def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
         self.forward_inputs = x
@@ -97,6 +107,10 @@ class Dropout(Layer):
         self.backward_inputs = output_gradient
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
+
+    # not implementing this methods in dropout
+    def get_gradients(self):
+        pass
 
 ###################
 # Activation Layers
@@ -117,6 +131,9 @@ class ActivationLayer(Layer):
         self.backward_inputs = output_gradient
         self.backward_outputs = self.backward_inputs * self.activation_prime(self.forward_inputs)
         return self.backward_outputs
+
+    def get_gradients(self):
+        return {'dA': self.backward_outputs}
 
 class Sigmoid(ActivationLayer):
     def __init__(self) -> None:
