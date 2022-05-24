@@ -3,6 +3,8 @@ import numpy as np
 from pynn.layers import Dense, Sigmoid
 from pynn.network import NeuralNetwork
 import pynn.functions as fn
+import matplotlib.pyplot as plt
+
 
 def main() -> None:
     # Prepare data
@@ -27,10 +29,10 @@ def main() -> None:
     nn.set_verbose(True)
 
     # Train
-    nn.train(X = x_test, Y = y, epochs = 1, learning_rate=0.5)
+    nn.train(X = x_test, Y = y, epochs = 7000, learning_rate=0.5)
 
     # Predict
-    prediction_vector = nn.predict(np.array([[0],[0]]))
+    #prediction_vector = nn.predict(np.array([[0],[0]]))
     # if prediction_vector > 0.5:
     #     print(1)
     # else:
@@ -38,7 +40,21 @@ def main() -> None:
 
     #nn.details()
     #nn.graph_costs()
-    nn.grad_check(X = x_test, Y = y)
+    #nn.grad_check(X = x_test, Y = y)
+
+    # decision boundary plot
+    points = []
+    for x in np.linspace(0, 1, 20):
+        for y in np.linspace(0, 1, 20):
+            z = nn.predict(x=[[x], [y]])
+            points.append([x, y, z[0,0]])
+
+    points = np.array(points)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(points[:, 0], points[:, 1], points[:, 2], c=points[:, 2], cmap="viridis")
+    plt.show()
 
 if __name__ == "__main__":
     main()
