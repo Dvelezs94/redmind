@@ -29,7 +29,7 @@ class Dataloader():
         return self
     
     def __len__(self):
-        return self.X.shape[1]
+        return self.n_batches
 
     def __next__(self):
         position = self.iter_index * self.batch_size

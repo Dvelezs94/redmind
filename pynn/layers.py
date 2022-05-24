@@ -73,8 +73,9 @@ class Dense(Layer):
 
 class Dropout(Layer):
     def __init__(self, drop_prob: float = 0) -> None:
-        assert 0 <= drop_prob <= 1, "Drop rate should be between 0 and 1"
+        assert 0 <= drop_prob < 1, "Drop probability rate should be between 0 and 0.9"
         self.drop_prob = drop_prob
+        self.keep_prob = 1 - self.drop_prob
         super().__init__()
 
     def __repr__(self):
@@ -83,19 +84,18 @@ class Dropout(Layer):
 
     def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
         self.forward_inputs = x
-        prob = [self.drop_prob, 1 - self.drop_prob]
-        if not self._train:
-            prob = [0, 1]
-        self.drop_matrix = np.random.choice([0, 1], size=x.shape, p=prob)
-        self.forward_outputs = np.multiply(self.drop_matrix, self.forward_inputs) / 1 - self.drop_prob
+        matrix_probs = [self.drop_prob, 1 - self.drop_prob]
+        if self._train:
+            matrix_probs = [self.drop_prob, 1 - self.drop_prob]
+            self.drop_matrix = np.random.choice([0, 1], size=x.shape, p=matrix_probs)
+            self.forward_outputs = np.multiply(self.drop_matrix, self.forward_inputs) / self.keep_prob
+        else:
+            self.forward_outputs = self.forward_inputs
         return self.forward_outputs
 
     def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
         self.backward_inputs = output_gradient
-        if not self._train:
-            self.backward_outputs = output_gradient
-        else:
-            self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / 1 - self.drop_prob
+        self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
 
 ###################

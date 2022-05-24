@@ -8,6 +8,7 @@ from pynn.layers import Dense, Dropout, Sigmoid, ReLU
 from pynn.network import NeuralNetwork
 from pynn.dataloader import Dataloader
 from pynn.utils import one_hot_encode
+import pynn.functions as fn
 
 def fetch_mnist_data():
     # training set
@@ -54,15 +55,22 @@ def main() -> None:
         ])
     nn.set_verbose(state=True)
 
-    # batch training
+    # batch training\
     for x, y in train_data:
-       nn.train(X = x, Y = y, epochs = 1000, learning_rate=0.5)
+        nn.train(X = x, Y = y, epochs = 100, learning_rate=0.5)
     # nn.graph_costs()
 
-    # predict random number
+    # Run test set predictions
+    for x,y in test_data:
+        predictions = nn.predict(x=x)
+        cost = fn.binary_cross_entropy(y, predictions)
+        print(f"Test set cost: {cost}, accuracy: {round(100 - (cost * 100), 4)}%")
+    
+    # predict a random image
     rand_x, rand_y = test_data.get_random_element()
     prediction = nn.predict(rand_x.reshape(784,1))
     plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
+    
 
 if __name__ == "__main__":
     main()
