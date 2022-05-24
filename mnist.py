@@ -37,8 +37,8 @@ def main() -> None:
 
     X_train, Y_train, X_test, Y_test = fetch_mnist_data()
     # Generate Dataloader object with X and Y as column vectors
-    train_data = Dataloader(X_train.T, Y_train.T, 20)
-    test_data = Dataloader(X_test.T, Y_test.T, 50)
+    train_data = Dataloader(X_train.T, Y_train.T, 100)
+    test_data = Dataloader(X_test.T, Y_test.T, 1)
 
     n_neurons_l1 = 100
     n_neurons_l2 = 100
@@ -57,22 +57,19 @@ def main() -> None:
 
     # batch training\
     for x, y in train_data:
-        nn.train(X = x, Y = y, epochs = 5, learning_rate=0.3)
-    # nn.graph_costs()
+        nn.train(X = x, Y = y, epochs = 30, learning_rate=0.3)
+    nn.graph_costs()
 
-    for x,y in test_data:
-        nn.grad_check(X = x, Y = y)
-        break
     # Run test set predictions
-    # for x,y in test_data:
-    #     predictions = nn.predict(x=x)
-    #     cost = fn.binary_cross_entropy(y, predictions)
-    #     print(f"Test set cost: {cost}, accuracy: {round(100 - (cost * 100), 4)}%")
+    for x,y in test_data:
+        predictions = nn.predict(x=x)
+        cost = fn.binary_cross_entropy(y, predictions)
+        print(f"Test set cost: {cost}, accuracy: {round(100 - (cost * 100), 4)}%")
     
     # predict a random image
-    # rand_x, rand_y = test_data.get_random_element()
-    # prediction = nn.predict(rand_x.reshape(784,1))
-    # plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
+    rand_x, rand_y = test_data.get_random_element()
+    prediction = nn.predict(rand_x.reshape(784,1))
+    plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
     
 
 if __name__ == "__main__":
