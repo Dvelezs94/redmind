@@ -81,7 +81,9 @@ class Dense(Layer):
     def get_gradients(self):
         return {'dW': self.weights_prime, 'db': self.bias_prime, 'dZ': self.backward_outputs}
 
-    
+    def modify_weights_and_biases(self, val=0):
+        self.weights += val
+        self.bias += val
 
 class Dropout(Layer):
     def __init__(self, drop_prob: float = 0) -> None:

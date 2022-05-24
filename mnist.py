@@ -37,7 +37,7 @@ def main() -> None:
 
     X_train, Y_train, X_test, Y_test = fetch_mnist_data()
     # Generate Dataloader object with X and Y as column vectors
-    train_data = Dataloader(X_train.T, Y_train.T, 1)
+    train_data = Dataloader(X_train.T, Y_train.T, 100)
     test_data = Dataloader(X_test.T, Y_test.T, 1)
 
     n_neurons_l1 = 100
@@ -52,12 +52,12 @@ def main() -> None:
             ReLU(),
             Dense(n_neurons_l3, n_neurons_l2, weight_init_scale=np.sqrt(2/n_neurons_l2)),
             Sigmoid()
-        ])
+        ], cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
     nn.set_verbose(state=True)
 
     # batch training\
     for x, y in train_data:
-        nn.train(X = x, Y = y, epochs = 100, learning_rate=0.5)
+        nn.train(X = x, Y = y, epochs = 20, learning_rate=0.1)
     # nn.graph_costs()
 
     # Run test set predictions

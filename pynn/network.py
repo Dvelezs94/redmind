@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from typing import List
 
 class NeuralNetwork:
-    def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.binary_cross_entropy, grad_function = fn.binary_cross_entropy_prime) -> None:
+    def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime) -> None:
         self.layers = layers
         self.costs = {}
         self._verbose = verbose
@@ -64,7 +64,7 @@ class NeuralNetwork:
         plt.ylabel("Cost")
         plt.show()
 
-    def grad_check(self, epsilon=1e-7):
+    def grad_check(self, X=None, Y=None, epsilon=1e-7):
         """
         Performs gradient checking and returns the norm of difference / norm of the sum (scalar)
         """
@@ -76,9 +76,9 @@ class NeuralNetwork:
             if isinstance(layer, Dense):
                 dense_weights = np.append(dense_weights, layer.weights.ravel())
                 dense_bias = np.append(dense_bias, layer.bias.ravel())
-        dense_merged = np.concatenate((dense_weights, dense_bias))
+        parameters = np.concatenate((dense_weights, dense_bias))
         if self._verbose:
-            print(dense_merged)
+            print(parameters)
 
         # Get gradients for all layers
         network_grads = np.empty(0)
@@ -91,11 +91,52 @@ class NeuralNetwork:
         if self._verbose:
             print(network_grads)
 
-        num_parameters = dense_merged.shape[0]
+        num_parameters = parameters.shape[0]
         J_plus = np.zeros((num_parameters, 1))
         J_minus = np.zeros((num_parameters, 1))
         gradapprox = np.zeros((num_parameters, 1))
 
-        #for i in range(num_parameters):
-            
+        for i in range(num_parameters):
+            # Thetaplus
+            # add epsilon to weights and biases in dense layers
+            for layer in self.layers:
+                if isinstance(layer, Dense):
+                    layer.modify_weights_and_biases(val=epsilon)
+            J_plus[i] = self.cost_function(Y, self.predict(x=X))
+
+            for layer in self.layers:
+                if isinstance(layer, Dense):
+                    layer.modify_weights_and_biases(val=-epsilon)
+
+            # Thetaminus
+            # subtract epsilon to weights and biases in dense layers
+            for layer in self.layers:
+                if isinstance(layer, Dense):
+                    layer.modify_weights_and_biases(val=-epsilon)
+
+            J_minus[i] = self.cost_function(Y, self.predict(x=X))
+            for layer in self.layers:
+                if isinstance(layer, Dense):
+                    layer.modify_weights_and_biases(val=epsilon)
+
+            gradapprox[i] = (J_plus[i] - J_minus[i]) / (2 * epsilon)
+
+        print(J_plus)
+        print("---")
+        print(J_minus)
+        
+        print(gradapprox)
+        numerator = np.linalg.norm(network_grads - gradapprox)
+        denominator = np.linalg.norm(network_grads) + np.linalg.norm(gradapprox)
+        difference = numerator / denominator
+        
+        # YOUR CODE ENDS HERE
+        if self._verbose:
+            if difference > 2e-7:
+                print ("\033[93m" + "There is a mistake in the backward propagation! difference = " + str(difference) + "\033[0m")
+            else:
+                print ("\033[92m" + "Your backward propagation works perfectly fine! difference = " + str(difference) + "\033[0m")
+
+        return difference
+
 

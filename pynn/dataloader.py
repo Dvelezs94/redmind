@@ -33,7 +33,7 @@ class Dataloader():
 
     def __next__(self):
         position = self.iter_index * self.batch_size
-        if position >= len(self):
+        if self.iter_index >= len(self):
             raise StopIteration
         x = self.X[:, position:position+self.batch_size]
         y = self.Y[:, position:position+self.batch_size]
