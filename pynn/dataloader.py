@@ -23,7 +23,7 @@ class Dataloader():
         self.n_batches = n_batches
         self.validate_data()
         self.batch_size = int(self.X.shape[1] / self.n_batches)
-        self.iter_index = 0
+        self._iter_index = 0
 
     def __iter__(self):
         return self
@@ -32,12 +32,14 @@ class Dataloader():
         return self.n_batches
 
     def __next__(self):
-        position = self.iter_index * self.batch_size
-        if self.iter_index >= len(self):
+        position = self._iter_index * self.batch_size
+        if self._iter_index >= len(self):
+            # reset iter and stop current iteration
+            self._iter_index = 0
             raise StopIteration
         x = self.X[:, position:position+self.batch_size]
         y = self.Y[:, position:position+self.batch_size]
-        self.iter_index += 1
+        self._iter_index += 1
         return x, y
 
     def __repr__(self):
