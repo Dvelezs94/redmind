@@ -3,6 +3,7 @@ import numpy as np
 import pynn.functions as fn
 import matplotlib.pyplot as plt
 from typing import List
+from pynn.dataloader import Dataloader
 
 class NeuralNetwork:
     def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime) -> None:
@@ -43,19 +44,26 @@ class NeuralNetwork:
         assert type(state) == bool
         self._verbose = state
 
-    def train(self, X=None, Y=None, epochs=100, learning_rate=0.1):
+    def train(self, X=None, Y=None, epochs=20, n_batches=1, learning_rate=0.1):
+        data = Dataloader(X=X, Y=Y, n_batches=n_batches)
+        #print(data)
         self.set_train(state=True)
+        if self._verbose:
+            if n_batches > 1:
+                print(f"Starting train with {n_batches} batches of size {data} ")
         for epoch in range(epochs):
-            # forward
-            y_pred = self.forward(x=X)
-            # calculate error and cost
-            cost = self.cost_function(Y, y_pred)
-            self.costs[epoch] = cost
-            error_gradient = self.grad_function(Y, y_pred)
-            # backward
-            self.backward(gradient=error_gradient, learning_rate=learning_rate)
+            for x, y in data:
+                # forward
+                y_pred = self.forward(x=x)
+                # calculate error and cost
+                cost = self.cost_function(y, y_pred)
+                self.costs[epoch] = cost
+                error_gradient = self.grad_function(y, y_pred)
+                # backward
+                self.backward(gradient=error_gradient, learning_rate=learning_rate)
             # print cost to console
-            print(f"epoch: {epoch + 1}/{epochs}, cost: {round(self.costs[epoch], 4)}, accuracy: {round(100 - (self.costs[epoch] * 100), 2)}%")
+            if self._verbose:
+                print(f"epoch: {epoch + 1}/{epochs}, cost: {round(self.costs[epoch], 4)}, accuracy: {round(100 - (self.costs[epoch] * 100), 2)}%")
         self.set_train(state=False)
 
     def graph_costs(self) -> None:

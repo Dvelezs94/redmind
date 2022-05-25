@@ -28,6 +28,7 @@ nn = NeuralNetwork([
 - [X] Add mini batch Gradient descent (through Dataloader)
 - [ ] Add Gradient checking
 - [ ] Support for multiple optimizers
+- [ ] Learning rate decay
 - [ ] Add early stoping support
 - [ ] Add convolutional layers
 - [ ] Add native pyplot support

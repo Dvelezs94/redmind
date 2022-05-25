@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pynn.layers import Dense, Dropout, Sigmoid, ReLU
 from pynn.network import NeuralNetwork
-from pynn.dataloader import Dataloader
 from pynn.utils import one_hot_encode
 import pynn.functions as fn
+from pynn.dataloader import Dataloader
 
 def fetch_mnist_data():
     # training set
@@ -34,11 +34,9 @@ def plot_image(x, title) -> None:
 
 
 def main() -> None:
-
     X_train, Y_train, X_test, Y_test = fetch_mnist_data()
-    # Generate Dataloader object with X and Y as column vectors
-    train_data = Dataloader(X_train.T, Y_train.T, 100)
-    test_data = Dataloader(X_test.T, Y_test.T, 1)
+    # transpose all to column vectors
+    X_train, Y_train, X_test, Y_test = X_train.T, Y_train.T, X_test.T, Y_test.T
 
     n_neurons_l1 = 100
     n_neurons_l2 = 100
@@ -55,18 +53,16 @@ def main() -> None:
         ], cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
     nn.set_verbose(state=True)
 
-    # batch training\
-    for x, y in train_data:
-        nn.train(X = x, Y = y, epochs = 30, learning_rate=0.3)
-    nn.graph_costs()
+    nn.train(X = X_train, Y = Y_train, epochs = 20, n_batches = 100, learning_rate=0.3)
+    #nn.graph_costs()
 
     # Run test set predictions
-    for x,y in test_data:
-        predictions = nn.predict(x=x)
-        cost = fn.binary_cross_entropy(y, predictions)
-        print(f"Test set cost: {cost}, accuracy: {round(100 - (cost * 100), 4)}%")
+    predictions = nn.predict(x=X_train)
+    train_cost = fn.binary_cross_entropy(Y_train, predictions)
+    print(f"Test set cost: {train_cost}, accuracy: {round(100 - (train_cost * 100), 4)}%")
     
-    # predict a random image
+    # # predict a random image
+    test_data = Dataloader(X_test, Y_test, 1)
     rand_x, rand_y = test_data.get_random_element()
     prediction = nn.predict(rand_x.reshape(784,1))
     plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
