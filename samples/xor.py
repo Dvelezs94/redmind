@@ -1,8 +1,8 @@
 import numpy as np
 
-from pynn.layers import Dense, Sigmoid
-from pynn.network import NeuralNetwork
-import pynn.functions as fn
+from redmind.layers import Dense, Sigmoid
+from redmind.network import NeuralNetwork
+import redmind.functions as fn
 import matplotlib.pyplot as plt
 
 

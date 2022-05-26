@@ -1,9 +1,9 @@
-from pynn.layers import Layer, Dense
+from redmind.layers import Layer, Dense
 import numpy as np
-import pynn.functions as fn
+import redmind.functions as fn
 import matplotlib.pyplot as plt
 from typing import List
-from pynn.dataloader import Dataloader
+from redmind.dataloader import Dataloader
 
 class NeuralNetwork:
     def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime) -> None:

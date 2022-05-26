@@ -1,14 +1,14 @@
 """
-MNIST implementation with pynn
+MNIST implementation with redmind
 """
 from torchvision import datasets
 import matplotlib.pyplot as plt
 import numpy as np
-from pynn.layers import Dense, Dropout, Sigmoid, ReLU
-from pynn.network import NeuralNetwork
-from pynn.utils import one_hot_encode
-import pynn.functions as fn
-from pynn.dataloader import Dataloader
+from redmind.layers import Dense, Dropout, Sigmoid, ReLU
+from redmind.network import NeuralNetwork
+from redmind.utils import one_hot_encode
+import redmind.functions as fn
+from redmind.dataloader import Dataloader
 
 def fetch_mnist_data():
     # training set
