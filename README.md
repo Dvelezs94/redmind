@@ -4,7 +4,7 @@ This is a python library made to help you build machine learning models.
 
 Developed by Diego Velez 2022
 
-## Quickstart
+## Quickstart (XOR example)
 
 ```python
 import numpy as np
@@ -21,7 +21,7 @@ xor = np.array([[0, 0],
 y = np.array([0, 1, 1, 0]).reshape(1,4)
 x_test = xor.T
 
-n_weights_1 = 10 # 3 neurons in the first layer
+n_weights_1 = 3 # 3 neurons in the first layer
 n_weights_2 = 1 # 1 neuron in the second layer (output)
 nn = NeuralNetwork(layers=[
         Dense(n_weights_1, x_test.shape[0]),
@@ -37,6 +37,10 @@ nn.train(X = x_test, Y = y, epochs = 1000, n_batches = 4, learning_rate=0.5)
 
 # Predict
 prediction_vector = nn.predict(np.array([[0],[0]]))
+if prediction_vector > 0.5:
+    print(1)
+else:
+    print(0)
 ```
 
 Go to `samples` folder for more samples
@@ -69,6 +73,7 @@ nn.predict(x_test)
 # Save NN model
 save_model(nn, filename='bigNN.dill')
 ```
+
 ### Load model
 
 ```python
@@ -80,7 +85,6 @@ nn = load_model(filename='bigNN.dill')
 # predict
 nn.predict(x_test)
 ```
-
 
 ## Objectives
 
