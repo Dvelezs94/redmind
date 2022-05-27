@@ -9,6 +9,7 @@ jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-18.04
+    steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.9
       uses: actions/setup-python@v1
@@ -19,8 +20,8 @@ jobs:
         python -m
         pip install twine
     - name: Extract tag name
-        id: tag
-        run: echo ::set-output name=TAG_NAME::$(echo $GITHUB_REF | cut -d / -f 3)
+      id: tag
+      run: echo ::set-output name=TAG_NAME::$(echo $GITHUB_REF | cut -d / -f 3)
     - name: Update version in setup.py
       run: >-
         sed "s/{{TAG_PLACEHOLDER}}/${{ steps.tag.outputs.TAG_NAME }}/g" setup.py
