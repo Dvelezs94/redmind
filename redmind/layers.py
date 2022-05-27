@@ -108,7 +108,7 @@ class Dropout(Layer):
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
 
-    # not implementing this methods in dropout
+    # not implementing this method in dropout
     def get_gradients(self):
         pass
 
