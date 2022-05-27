@@ -7,11 +7,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
-VERSION = '0.0.1'
+# This gets deployed when a new release is made by github actions
+VERSION = '{{TAG_PLACEHOLDER}}'
 DESCRIPTION = 'Package for building Machine learning models'
 LONG_DESCRIPTION = 'A package that allows you to build complex machine learning models in a simple fashion'
 
-# Setting up
 setup(
     name="redmind",
     version=VERSION,
