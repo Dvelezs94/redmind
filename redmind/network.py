@@ -66,7 +66,7 @@ class NeuralNetwork:
             if self._verbose:
                 print(f"epoch: {epoch + 1}/{epochs}, cost: {round(self.costs[epoch], 4)}, accuracy: {accuracy}%")
             if early_stoping > 0.0 and accuracy >= early_stoping:
-                print("Training stoped learning due to early stoping")
+                print("Training stoped due to early stoping")
                 break
         self.set_train(state=False)
 
