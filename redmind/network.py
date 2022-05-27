@@ -1,4 +1,4 @@
-from redmind.layers import Layer, Dense
+from redmind.layers import Layer
 import numpy as np
 import redmind.functions as fn
 import matplotlib.pyplot as plt
@@ -76,3 +76,5 @@ class NeuralNetwork:
         plt.xlabel("Epoch")
         plt.ylabel("Cost")
         plt.show()
+
+

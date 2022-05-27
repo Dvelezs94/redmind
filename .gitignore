@@ -133,3 +133,4 @@ datasets/
 
 # test files
 test_redmind.py
+*.dill
