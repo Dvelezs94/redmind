@@ -8,7 +8,7 @@ with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
     long_description = "\n" + fh.read()
 
 # This gets deployed when a new release is made by github actions
-VERSION = '{{TAG_PLACEHOLDER}}'
+VERSION = '{{VERSION_PLACEHOLDER}}'
 DESCRIPTION = 'Package for building Machine learning models'
 LONG_DESCRIPTION = 'A package that allows you to build complex machine learning models in a simple fashion'
 
