@@ -62,7 +62,7 @@ def main() -> None:
     print(f"Test set cost: {train_cost}, accuracy: {round(100 - (train_cost * 100), 4)}%")
     
     # # predict a random image
-    test_data = Dataloader(X_test, Y_test, 1)
+    test_data = Dataloader(X_test, Y_test)
     rand_x, rand_y = test_data.get_random_element()
     prediction = nn.predict(rand_x.reshape(784,1))
     plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")
