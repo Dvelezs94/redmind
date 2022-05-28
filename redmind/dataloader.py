@@ -11,7 +11,7 @@ class Dataloader():
 
     Warning: Make sure you input both X and Y as column vectors
     """
-    def __init__(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1, shuffle=False):
+    def __init__(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1):
         """
         inputs
         ---
@@ -25,8 +25,6 @@ class Dataloader():
         self.validate_data()
         self.n_batches = math.ceil(self.X.shape[1] / self.batch_size)
         self._iter_index = 0
-        if shuffle:
-            self.shuffle()
 
     def __iter__(self):
         return self
