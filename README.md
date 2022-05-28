@@ -33,7 +33,7 @@ nn = NeuralNetwork(layers=[
 nn.set_verbose(True)
 
 # Train
-nn.train(X = x_test, Y = y, epochs = 1000, n_batches = 4, learning_rate=0.5)
+nn.train(X = x_test, Y = y, epochs = 1000, batch_size = 4, learning_rate=0.5)
 
 # Predict
 prediction_vector = nn.predict(np.array([[0],[0]]))
@@ -65,7 +65,7 @@ nn = NeuralNetwork(layers=[
     grad_function=fn.binary_cross_entropy_prime)
 
 # train
-nn.train(X = x_test, Y = y, epochs = 100000 ,n_batches = 500, learning_rate=0.5, early_stoping=99.0)
+nn.train(X = x_test, Y = y, epochs = 100000 ,batch_size = 512, learning_rate=0.5, early_stoping=99.0)
 
 # predict
 nn.predict(x_test)

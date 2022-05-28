@@ -44,13 +44,12 @@ class NeuralNetwork:
         assert type(state) == bool
         self._verbose = state
 
-    def train(self, X: np.ndarray = None, Y: np.ndarray = None, epochs: int =20, n_batches: int = 1, learning_rate: float = 0.1, early_stoping: float = 0.0):
-        data = Dataloader(X=X, Y=Y, n_batches=n_batches)
-        #print(data)
+    def train(self, X: np.ndarray = None, Y: np.ndarray = None, epochs: int =20, batch_size: int = 1, learning_rate: float = 0.1, early_stoping: float = 0.0):
+        data = Dataloader(X=X, Y=Y, batch_size=batch_size)
         self.set_train(state=True)
         if self._verbose:
-            if n_batches > 1:
-                print(f"Starting train with {n_batches} batches of size {data} ")
+            if batch_size > 1:
+                print(f"Starting training with {data}")
         for epoch in range(epochs):
             for x, y in data:
                 # forward

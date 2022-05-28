@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 class Dataloader():
     """
@@ -10,19 +11,19 @@ class Dataloader():
 
     Warning: Make sure you input both X and Y as column vectors
     """
-    def __init__(self, X, Y, n_batches=1):
+    def __init__(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1):
         """
         inputs
         ---
         X: Matrix of features X as column vectors
         Y: Output labels Y as column vectors
-        n_batches: number of batches you want to have for the entire data. defaults to 1
+        batch_size: number of elements per batch. Defaults to 1
         """
         self.X = X
         self.Y = Y
-        self.n_batches = n_batches
+        self.batch_size = batch_size
         self.validate_data()
-        self.batch_size = int(self.X.shape[1] / self.n_batches)
+        self.n_batches = math.ceil(self.X.shape[1] / self.batch_size)
         self._iter_index = 0
 
     def __iter__(self):
@@ -52,12 +53,12 @@ class Dataloader():
         assert type(self.X) == np.ndarray, "X is not a numpy array"
         assert type(self.Y) == np.ndarray, "Y is not a numpy array"
         assert self.X.shape[1] == self.Y.shape[1], "X and Y do not have the same number of columns/items"
-        assert self.X.shape[1] % self.n_batches == 0, f"X({self.X.shape[1]}) is not divisible by {self.n_batches}"
-        assert self.Y.shape[1] % self.n_batches == 0, f"X({self.Y.shape[1]}) is not divisible by {self.n_batches}"
+        assert type(self.batch_size) == int, "batch_size should be integer value"
+        assert math.floor(self.X.shape[1] / self.batch_size) >= 1, f"X matrix is not divisible by {self.batch_size}. Enter a valid batch size"
     
     def get_random_element(self):
         """
-        Returns a random element with its features and label
+        Returns a single random element with its features and label
         """
         elem = random.randint(0, len(self))
         x = self.X[:, elem].reshape(self.X.shape[0], 1)

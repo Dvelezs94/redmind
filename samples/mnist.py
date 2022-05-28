@@ -53,7 +53,7 @@ def main() -> None:
         ], cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
     nn.set_verbose(state=True)
 
-    nn.train(X = X_train, Y = Y_train, epochs = 20, n_batches = 100, learning_rate=0.3)
+    nn.train(X = X_train, Y = Y_train, epochs = 20, batch_size = 128, learning_rate=0.3)
     #nn.graph_costs()
 
     # Run test set predictions
