@@ -4,14 +4,16 @@ import redmind.functions as fn
 import matplotlib.pyplot as plt
 from typing import List
 from redmind.dataloader import Dataloader
+from redmind.optimizers import Optimizer, GradientDescent
 
 class NeuralNetwork:
-    def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime) -> None:
+    def __init__(self, layers: List[Layer], verbose=False, cost_function = fn.mse, grad_function = fn.mse_prime, optimizer: Optimizer = GradientDescent()) -> None:
         self.layers = layers
         self.costs = {}
         self._verbose = verbose
         self.cost_function = cost_function
         self.grad_function = grad_function
+        self.optimizer = optimizer
         if self._verbose:
             print(f"Neural Network initialized with {len(self.layers)} layers")
 
@@ -22,13 +24,13 @@ class NeuralNetwork:
     def forward(self, x: np.ndarray = None) -> np.ndarray:
         out = x
         for layer in self.layers:
-            out = layer.forward(x = out)
+            out = layer.forward(out)
         return out
 
-    def backward(self, gradient: float = None, learning_rate: float = None) -> None:
+    def backward(self, gradient: float = None) -> None:
         grad = gradient
         for layer in reversed(self.layers):
-            grad = layer.backward(output_gradient=grad, learning_rate=learning_rate)
+            grad = layer.backward(output_gradient=grad)
         return None
 
     def predict(self, x: np.ndarray = None):
@@ -53,13 +55,16 @@ class NeuralNetwork:
         for epoch in range(epochs):
             for x, y in data:
                 # forward
-                y_pred = self.forward(x=x)
+                y_pred = self.forward(x)
                 # calculate error and cost
                 cost = self.cost_function(y, y_pred)
                 self.costs[epoch] = cost
                 error_gradient = self.grad_function(y, y_pred)
                 # backward
-                self.backward(gradient=error_gradient, learning_rate=learning_rate)
+                self.backward(gradient=error_gradient)
+                # Update layer params
+                for layer in self.layers:
+                    layer.update_params(optimizer=self.optimizer, learning_rate=learning_rate)
             # print cost to console
             accuracy = round(100 - (self.costs[epoch] * 100), 3)
             if self._verbose:

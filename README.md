@@ -43,6 +43,57 @@ else:
     print(0)
 ```
 
+## Cost functions
+
+## Optimizers
+
+Redmind has support for using different optimizers. We include the most widely used ones, but you can also create your own very easily.
+
+### Using a different Optimizer
+
+The default optimizer is Gradient Descent, however you can change it.
+
+```python
+from redmind.optimizers import Adam
+
+nn = NeuralNetwork(layers=[
+    Dense(n_weights_1, x_train.shape[0]),
+    ReLU(),
+    Dense(n_weights_2, n_weights_1),
+    Sigmoid()
+], cost_function=fn.mse, 
+grad_function=fn.mse_prime, optimizer=Adam())
+```
+
+Native supported optimizers
+
+- GradientDescent
+
+- Momentum
+
+- RMSprop
+
+- Adam
+
+
+### Creating your own optimizer
+
+You can create your own optimizer and use that in the NN, you just need to create a callable class with the `Optimizer` fingerprint. 
+
+```python
+class CustomOptimizer():
+    def __call__(self, gradients: np.ndarray, learning_rate: float) -> np.ndarray:
+        ...
+
+nn = NeuralNetwork(layers=[
+    Dense(n_weights_1, x_train.shape[0]),
+    ReLU(),
+    Dense(n_weights_2, n_weights_1),
+    Sigmoid()
+], cost_function=fn.mse, 
+grad_function=fn.mse_prime, optimizer=CustomOptimizer())
+```
+
 Go to `samples` folder for more samples
 
 ## Save and Load Models
