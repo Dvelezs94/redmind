@@ -6,6 +6,16 @@ from typing import List
 from abc import ABC, abstractmethod
 from redmind.layers import Layer
 
+def init_velocity_vector(layers):
+    gradients_velocity = {}
+    # build velocity np zeros array
+    for idx, layer in enumerate(layers):
+        trainable_params = layer.get_trainable_params()
+        gradients_velocity[idx] = trainable_params
+        for param, grads in trainable_params.items():
+            gradients_velocity[idx][param] = np.zeros(grads.shape)
+    return gradients_velocity
+
 class Optimizer(ABC):
     """
     Only one optimizer can be assigned to the entire NN
@@ -41,26 +51,16 @@ class GradientDescent(Optimizer):
 class Momentum(Optimizer):
     beta = 0.9
 
-    def bootstrap(self) -> None: 
-        self.gradients_velocity = {}
-        # build velocity np zeros array
-        for idx, layer in enumerate(self.layers):
-            trainable_params = layer.get_trainable_params()
-            self.gradients_velocity[idx] = trainable_params
-            for param, grads in trainable_params.items():
-                self.gradients_velocity[idx][param] = np.zeros(grads.shape)
-
     def __call__(self) -> None:
         # hacky solution but works
         # This is done because how the initialization is done
         # this might need a refactor in the future
         if not hasattr(self, 'gradients_velocity'):
-            self.bootstrap()
+            self.gradients_velocity = init_velocity_vector(self.layers)
         pass
 
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
-            self.gradients_velocity[idx] = trainable_params
             for param, grads in trainable_params.items():
                 self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * grads
                 trainable_params[param] = self.gradients_velocity[idx][param] * self.learning_rate
@@ -71,8 +71,16 @@ class RMSprop(Optimizer):
     epsilon = 1e-7
 
     def __call__(self) -> None:
-        vgrad = self.beta * gradients + (1 - self.beta) * np.power(gradients, 2) 
-        return learning_rate * (vgrad / np.sqrt(vgrad + self.epsilon))
+        if not hasattr(self, 'gradients_velocity'):
+            self.gradients_velocity = init_velocity_vector(self.layers)
+        pass
+
+        for idx, layer in enumerate(self.layers):
+            trainable_params = layer.get_trainable_params()
+            for param, grads in trainable_params.items():
+                self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * np.power(grads, 2)
+                trainable_params[param] = (grads / np.sqrt(self.gradients_velocity[idx][param] + self.epsilon)) * self.learning_rate
+            layer.update_trainable_params(trainable_params)
 
 class Adam(Optimizer):
     beta1 = 0.9
