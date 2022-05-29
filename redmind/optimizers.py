@@ -40,14 +40,31 @@ class GradientDescent(Optimizer):
 
 class Momentum(Optimizer):
     beta = 0.9
-    velocity = None
 
-    def __init__(self) -> None: 
-        self.gradients_velocity = []
+    def bootstrap(self) -> None: 
+        self.gradients_velocity = {}
+        # build velocity np zeros array
+        for idx, layer in enumerate(self.layers):
+            trainable_params = layer.get_trainable_params()
+            self.gradients_velocity[idx] = trainable_params
+            for k, v in trainable_params.items():
+                self.gradients_velocity[idx][k] = np.zeros(v.shape)
 
     def __call__(self) -> None:
-        vgrad = self.beta * self.velocity + (1 - self.beta) * gradients
-        return vgrad * learning_rate
+        # hacky solution but works
+        # This is done because how the initialization is done
+        # this might need a refactor in the future
+        if not hasattr(self, 'gradients_velocity'):
+            self.bootstrap()
+        pass
+
+        for idx, layer in enumerate(self.layers):
+            trainable_params = layer.get_trainable_params()
+            self.gradients_velocity[idx] = trainable_params
+            for k, v in trainable_params.items():
+                self.gradients_velocity[idx][k] = self.beta * self.gradients_velocity[idx][k] + (1 - self.beta) * v
+                trainable_params[k] = self.gradients_velocity[idx][k] * self.learning_rate
+            layer.update_trainable_params(trainable_params)
 
 class RMSprop(Optimizer):
     beta = 0.9

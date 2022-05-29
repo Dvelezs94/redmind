@@ -55,7 +55,7 @@ grad_function: This function computes the gradients from the forward pass output
 
 ### Defining custom cost and grad functions
 
-Cost and grad functions have the same signaturem however cost functions expect an output as np.float64, while gradients expect a numpy array
+Cost and grad functions have the same signature however cost functions expect an output as np.float64, while gradients expect a numpy array
 
 ```python
 def custom_cost(y, y_pred) -> np.float64:
@@ -112,7 +112,7 @@ class CustomOptimizer(Optimizer):
         for layer in self.layers:
             trainable_params = layer.get_trainable_params()
             for k, v in trainable_params.items():
-                # Run your computations for each layer updatable params
+                # Run your computations for each layer trainable params
                 ...
             # update trainable params for that layer
             layer.update_trainable_params(trainable_params)
@@ -128,7 +128,8 @@ grad_function=fn.mse_prime, optimizer=CustomOptimizer())
 
 ## Save and Load Models
 
-Redmind support saving and loading models as well, here is how to do it
+You can also save and load your trained models, this makes easy for you to
+package, shit and use your models everywhere you want.
 
 ### Save model
 ```python
@@ -138,12 +139,12 @@ from redmind.utils import save_model
 n_weights_1 = 300 
 n_weights_2 = 750
 nn = NeuralNetwork(layers=[
-        Dense(n_weights_1, x_train.shape[0]),
-        Sigmoid(),
-        Dense(n_weights_2, n_weights_1),
-        Sigmoid()
-    ], cost_function=fn.binary_cross_entropy, 
-    grad_function=fn.binary_cross_entropy_prime)
+    Dense(n_weights_1, x_train.shape[0]),
+    Sigmoid(),
+    Dense(n_weights_2, n_weights_1),
+    Sigmoid()
+], cost_function=fn.binary_cross_entropy, 
+grad_function=fn.binary_cross_entropy_prime)
 
 # train
 nn.train(X = x_test, Y = y, epochs = 100000 ,batch_size = 512, learning_rate=0.5, early_stoping=99.0)
@@ -167,7 +168,7 @@ nn = load_model(filename='bigNN.dill')
 nn.predict(x_test)
 ```
 
-## Objectives
+## Features
 
 - [X] Classes definition and construction
 - [X] Forward propagation fully working
