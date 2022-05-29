@@ -7,8 +7,13 @@ from abc import ABC, abstractmethod
 from redmind.layers import Layer
 
 def init_velocity_vector(layers):
+    # hacky solution but works
+    # This is done because we initialize the optimizer at the same time we do
+    # for the layers. It would be possible to use this in the init if we
+    # used the optimizer outside the network, but I dont like that approach.
+    # this might need a refactor in the future
     gradients_velocity = {}
-    # build velocity np zeros array
+    # build layers velocity dict with np zeros array for each trainable pram
     for idx, layer in enumerate(layers):
         trainable_params = layer.get_trainable_params()
         gradients_velocity[idx] = trainable_params
@@ -52,9 +57,6 @@ class Momentum(Optimizer):
     beta = 0.9
 
     def __call__(self) -> None:
-        # hacky solution but works
-        # This is done because how the initialization is done
-        # this might need a refactor in the future
         if not hasattr(self, 'gradients_velocity'):
             self.gradients_velocity = init_velocity_vector(self.layers)
         pass
@@ -83,11 +85,23 @@ class RMSprop(Optimizer):
             layer.update_trainable_params(trainable_params)
 
 class Adam(Optimizer):
+    """Adam is a combination of momentum and RMSprop, thats why the velocity names"""
     beta1 = 0.9
-    beta2 = 0.99
+    beta2 = 0.999
     epsilon = 1e-7
+    t = 2
 
     def __call__(self) -> None:
-        vgrad = self.beta1 * v["dW" + str(l)] + (1 - self.beta1) * grads['dW' + str(l)]
+        if not hasattr(self, 'rmsprop_velocity'):
+            self.momentum_velocity = init_velocity_vector(self.layers)
+            self.rmsprop_velocity = init_velocity_vector(self.layers)
         pass
+
+        for idx, layer in enumerate(self.layers):
+            trainable_params = layer.get_trainable_params()
+            for param, grads in trainable_params.items():
+                self.momentum_velocity[idx][param] = ((self.beta1 * self.momentum_velocity[idx][param]) + ((1 - self.beta1) * grads)) 
+                self.rmsprop_velocity[idx][param] = ((self.beta2 * self.rmsprop_velocity[idx][param]) + ((1 - self.beta2) * np.power(grads, 2)))
+                trainable_params[param] = (self.momentum_velocity[idx][param] / np.sqrt(self.rmsprop_velocity[idx][param] + self.epsilon)) * self.learning_rate
+            layer.update_trainable_params(trainable_params)
 

@@ -59,7 +59,9 @@ class Layer(ABC):
         self._freeze = False
     
 class Dense(Layer):
-    def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1) -> None:
+    def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1, seed: int = None) -> None:
+        if seed:
+            np.random.seed(seed)
         self.weights = np.random.randn(n_rows, n_columns) * weight_init_scale
         self.bias = np.random.randn(n_rows, 1)
         self.bias_prime = None
