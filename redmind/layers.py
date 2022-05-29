@@ -35,7 +35,7 @@ class Layer(ABC):
         pass
 
     def get_trainable_params(self) -> Dict[str, np.ndarray]:
-        """Returns a list of trainable parameters by the layer"""
+        """Returns a dictionary of all trainable parameters by the layer"""
         return {}
 
     def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
