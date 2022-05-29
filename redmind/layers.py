@@ -1,6 +1,6 @@
-from abc import ABC, abstractmethod
 import numpy as np
-from redmind.optimizers import Optimizer
+from abc import ABC, abstractmethod
+from typing import Dict
 
 class Layer(ABC):
     """
@@ -34,8 +34,12 @@ class Layer(ABC):
     def backward(self, output_gradient: float) -> np.ndarray:
         pass
 
-    @abstractmethod
-    def update_params(self, optimizer: Optimizer, learning_rate) -> None:
+    def get_trainable_params(self) -> Dict[str, np.ndarray]:
+        """Returns a list of trainable parameters by the layer"""
+        return {}
+
+    def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
+        """Update trainable params. Order of optimized_params is the same as get_trainable_params"""
         pass
 
     def get_train(self):
@@ -74,16 +78,19 @@ class Dense(Layer):
     def backward(self, output_gradient: float) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
+        # compute gradients
+        self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
+        self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)
         return self.backward_outputs
 
-    def update_params(self,  optimizer: Optimizer, learning_rate: float = 0.1) -> None:
+    def get_trainable_params(self) -> Dict[str, np.ndarray]:
+        return {'weights_prime': self.weights_prime, 'bias_prime': self.bias_prime}
+
+    def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
         if not self._freeze:
-            # compute gradients
-            self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
-            self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)
-            # update w and b
-            self.weights -= optimizer(self.weights_prime, learning_rate)
-            self.bias -= optimizer(self.bias_prime, learning_rate)
+            # update weights and biases
+            self.weights -= optimized_params['weights_prime']
+            self.bias -= optimized_params['bias_prime']
         return None
 
 class Dropout(Layer):
@@ -108,9 +115,6 @@ class Dropout(Layer):
         self.backward_inputs = output_gradient
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
-    
-    def update_params(self, optimizer: Optimizer, learning_rate) -> None:
-        pass
 
 ###################
 # Activation Layers
@@ -131,9 +135,6 @@ class ActivationLayer(Layer):
         self.backward_inputs = output_gradient
         self.backward_outputs = self.backward_inputs * self.activation_prime(self.forward_inputs)
         return self.backward_outputs
-
-    def update_params(self, optimizer: Optimizer, learning_rate) -> None:
-        pass
 
 class Sigmoid(ActivationLayer):
     def __init__(self) -> None:

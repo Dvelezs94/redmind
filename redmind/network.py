@@ -1,8 +1,8 @@
-from redmind.layers import Layer
 import numpy as np
 import redmind.functions as fn
 import matplotlib.pyplot as plt
 from typing import List
+from redmind.layers import Layer
 from redmind.dataloader import Dataloader
 from redmind.optimizers import Optimizer, GradientDescent
 
@@ -13,6 +13,8 @@ class NeuralNetwork:
         self._verbose = verbose
         self.cost_function = cost_function
         self.grad_function = grad_function
+        # Set up network optimizer
+        optimizer.set_layers(self.layers)
         self.optimizer = optimizer
         if self._verbose:
             print(f"Neural Network initialized with {len(self.layers)} layers")
@@ -46,9 +48,10 @@ class NeuralNetwork:
         assert type(state) == bool
         self._verbose = state
 
-    def train(self, X: np.ndarray = None, Y: np.ndarray = None, epochs: int =20, batch_size: int = 1, learning_rate: float = 0.1, early_stoping: float = 0.0):
+    def train(self, X: np.ndarray = None, Y: np.ndarray = None, epochs: int = 20, batch_size: int = 1, learning_rate: float = 1e-2, early_stoping: float = 0.0):
         data = Dataloader(X=X, Y=Y, batch_size=batch_size)
         self.set_train(state=True)
+        self.optimizer.set_learning_rate(learning_rate)
         if self._verbose:
             if batch_size > 1:
                 print(f"Starting training with {data}")
@@ -62,9 +65,8 @@ class NeuralNetwork:
                 error_gradient = self.grad_function(y, y_pred)
                 # backward
                 self.backward(gradient=error_gradient)
-                # Update layer params
-                for layer in self.layers:
-                    layer.update_params(optimizer=self.optimizer, learning_rate=learning_rate)
+                # Optimize layers params
+                self.optimizer()
             # print cost to console
             accuracy = round(100 - (self.costs[epoch] * 100), 3)
             if self._verbose:
