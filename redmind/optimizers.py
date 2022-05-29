@@ -34,8 +34,8 @@ class GradientDescent(Optimizer):
     def __call__(self) -> None:
         for layer in self.layers:
             trainable_params = layer.get_trainable_params()
-            for k, v in trainable_params.items():
-                trainable_params[k] = v * self.learning_rate
+            for param, grads in trainable_params.items():
+                trainable_params[param] = grads * self.learning_rate
             layer.update_trainable_params(trainable_params)
 
 class Momentum(Optimizer):
@@ -47,8 +47,8 @@ class Momentum(Optimizer):
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
             self.gradients_velocity[idx] = trainable_params
-            for k, v in trainable_params.items():
-                self.gradients_velocity[idx][k] = np.zeros(v.shape)
+            for param, grads in trainable_params.items():
+                self.gradients_velocity[idx][param] = np.zeros(grads.shape)
 
     def __call__(self) -> None:
         # hacky solution but works
@@ -61,9 +61,9 @@ class Momentum(Optimizer):
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
             self.gradients_velocity[idx] = trainable_params
-            for k, v in trainable_params.items():
-                self.gradients_velocity[idx][k] = self.beta * self.gradients_velocity[idx][k] + (1 - self.beta) * v
-                trainable_params[k] = self.gradients_velocity[idx][k] * self.learning_rate
+            for param, grads in trainable_params.items():
+                self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * grads
+                trainable_params[param] = self.gradients_velocity[idx][param] * self.learning_rate
             layer.update_trainable_params(trainable_params)
 
 class RMSprop(Optimizer):
