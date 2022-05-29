@@ -29,7 +29,7 @@ def main() -> None:
     nn.set_verbose(True)
 
     # Train
-    nn.train(X = x_test, Y = y, epochs = 1000,n_batches = 4, learning_rate=0.5)
+    #nn.train(X = x_test, Y = y, epochs = 1000, batch_size = 1, learning_rate=0.5)
 
     # Predict
     #prediction_vector = nn.predict(np.array([[0],[0]]))

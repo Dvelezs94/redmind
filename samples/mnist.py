@@ -53,7 +53,7 @@ def main() -> None:
         ], cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
     nn.set_verbose(state=True)
 
-    nn.train(X = X_train, Y = Y_train, epochs = 20, n_batches = 100, learning_rate=0.3)
+    nn.train(X = X_train, Y = Y_train, epochs = 20, batch_size = 128, learning_rate=0.3)
     #nn.graph_costs()
 
     # Run test set predictions
@@ -62,7 +62,7 @@ def main() -> None:
     print(f"Test set cost: {train_cost}, accuracy: {round(100 - (train_cost * 100), 4)}%")
     
     # # predict a random image
-    test_data = Dataloader(X_test, Y_test, 1)
+    test_data = Dataloader(X_test, Y_test)
     rand_x, rand_y = test_data.get_random_element()
     prediction = nn.predict(rand_x.reshape(784,1))
     plot_image(rand_x.reshape(28,28), f"real: {rand_y.argmax()} / predicted: {prediction.argmax()}")

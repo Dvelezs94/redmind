@@ -1,5 +1,6 @@
-from abc import ABC, abstractmethod
 import numpy as np
+from abc import ABC, abstractmethod
+from typing import Dict
 
 class Layer(ABC):
     """
@@ -14,6 +15,7 @@ class Layer(ABC):
         self.forward_outputs = None
         self.backward_inputs = None
         self.backward_outputs = None
+        self._freeze = False
         self._train = False
 
     def __repr__(self, extra_fields = {}):
@@ -25,11 +27,19 @@ class Layer(ABC):
                 **extra_fields})
     
     @abstractmethod
-    def forward(self, x: np.ndarray = None, **kwargs):
+    def forward(self, x: np.ndarray) -> np.ndarray:
         pass
 
     @abstractmethod
-    def backward(self, output_gradient: float = None, **kwargs):
+    def backward(self, output_gradient: float) -> np.ndarray:
+        pass
+
+    def get_trainable_params(self) -> Dict[str, np.ndarray]:
+        """Returns a dictionary of all trainable parameters by the layer"""
+        return {}
+
+    def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
+        """Update trainable params. Order of optimized_params is the same as get_trainable_params"""
         pass
 
     def get_train(self):
@@ -38,16 +48,20 @@ class Layer(ABC):
     def set_train(self, state):
         assert type(state) == bool
         self._train = state
-
-    @abstractmethod
-    def get_gradients():
+    
+    def freeze(self):
         """
-        This should return all the gradients as dictionary
+        Freeze layer. Useful when doing transfer learning (pending implementation)
         """
-        pass
+        self._freeze = True
+    
+    def unfreeze(self):
+        self._freeze = False
     
 class Dense(Layer):
-    def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1) -> None:
+    def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1, seed: int = None) -> None:
+        if seed:
+            np.random.seed(seed)
         self.weights = np.random.randn(n_rows, n_columns) * weight_init_scale
         self.bias = np.random.randn(n_rows, 1)
         self.bias_prime = None
@@ -58,32 +72,28 @@ class Dense(Layer):
         fields = {'weights': self.weights, 'bias': self.bias}
         return super().__repr__(extra_fields = fields)
 
-    def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = np.dot(self.weights, self.forward_inputs) + self.bias
         return self.forward_outputs
 
-    def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
+    def backward(self, output_gradient: float) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = np.dot(self.weights.T, self.backward_inputs)
-        self.update_params(learning_rate=kwargs['learning_rate'])
-        return self.backward_outputs
-
-    def update_params(self, learning_rate: float = 0.1) -> None:
         # compute gradients
         self.weights_prime = np.dot(self.backward_inputs, self.forward_inputs.T)
         self.bias_prime = np.sum(self.backward_inputs, axis=1, keepdims=True)
-        # update w and b
-        self.weights = self.weights - (self.weights_prime * learning_rate)
-        self.bias = self.bias - (self.bias_prime * learning_rate)
+        return self.backward_outputs
+
+    def get_trainable_params(self) -> Dict[str, np.ndarray]:
+        return {'weights_prime': self.weights_prime, 'bias_prime': self.bias_prime}
+
+    def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
+        if not self._freeze:
+            # update weights and biases
+            self.weights -= optimized_params['weights_prime']
+            self.bias -= optimized_params['bias_prime']
         return None
-
-    def get_gradients(self):
-        return {'dW': self.weights_prime, 'db': self.bias_prime, 'dZ': self.backward_outputs}
-
-    def modify_weights_and_biases(self, val=0):
-        self.weights += val
-        self.bias += val
 
 class Dropout(Layer):
     def __init__(self, drop_prob: float = 0) -> None:
@@ -92,7 +102,7 @@ class Dropout(Layer):
         self.keep_prob = 1 - self.drop_prob
         super().__init__()
 
-    def forward(self, x: np.ndarray = None, **kwargs) -> np.ndarray:
+    def forward(self, x: np.ndarray) -> np.ndarray:
         self.forward_inputs = x
         matrix_probs = [self.drop_prob, 1 - self.drop_prob]
         if self._train:
@@ -103,14 +113,10 @@ class Dropout(Layer):
             self.forward_outputs = self.forward_inputs
         return self.forward_outputs
 
-    def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
+    def backward(self, output_gradient: float) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
-
-    # not implementing this methods in dropout
-    def get_gradients(self):
-        pass
 
 ###################
 # Activation Layers
@@ -122,18 +128,15 @@ class ActivationLayer(Layer):
         self.activation_prime = activation_prime
         super().__init__()
 
-    def forward(self, x, **kwargs) -> np.ndarray:
+    def forward(self, x) -> np.ndarray:
         self.forward_inputs = x
         self.forward_outputs = self.activation(self.forward_inputs)
         return self.forward_outputs
 
-    def backward(self, output_gradient: float = None, **kwargs) -> np.ndarray:
+    def backward(self, output_gradient: float) -> np.ndarray:
         self.backward_inputs = output_gradient
         self.backward_outputs = self.backward_inputs * self.activation_prime(self.forward_inputs)
         return self.backward_outputs
-
-    def get_gradients(self):
-        return {'dA': self.backward_outputs}
 
 class Sigmoid(ActivationLayer):
     def __init__(self) -> None:

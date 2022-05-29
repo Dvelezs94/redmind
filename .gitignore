@@ -130,3 +130,7 @@ dmypy.json
 
 # datasets folder
 datasets/
+
+# test files
+test_redmind.py
+*.dill
