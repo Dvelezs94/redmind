@@ -4,6 +4,12 @@ This is a python library made to help you build machine learning models.
 
 Developed by Diego Velez 2022
 
+## Installation
+
+```shell
+pip3 install redmind
+```
+
 ## Quickstart (XOR example)
 
 ```python
