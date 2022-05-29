@@ -89,7 +89,6 @@ class Adam(Optimizer):
     beta1 = 0.9
     beta2 = 0.999
     epsilon = 1e-7
-    t = 2
 
     def __call__(self) -> None:
         if not hasattr(self, 'rmsprop_velocity'):
