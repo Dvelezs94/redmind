@@ -4,11 +4,13 @@ MNIST implementation with redmind
 from torchvision import datasets
 import matplotlib.pyplot as plt
 import numpy as np
+import redmind.functions as fn
+import redmind.optimizers as optimizer
 from redmind.layers import Dense, Dropout, Sigmoid, ReLU
 from redmind.network import NeuralNetwork
 from redmind.utils import one_hot_encode
-import redmind.functions as fn
 from redmind.dataloader import Dataloader
+from redmind.trainer import Trainer
 
 def fetch_mnist_data():
     # training set
@@ -38,22 +40,23 @@ def main() -> None:
     # transpose all to column vectors
     X_train, Y_train, X_test, Y_test = X_train.T, Y_train.T, X_test.T, Y_test.T
 
-    n_neurons_l1 = 100
-    n_neurons_l2 = 100
+    n_neurons_l1 = 25
+    n_neurons_l2 = 25
     n_neurons_l3 = 10 # 10 output classes
 
     nn = NeuralNetwork(layers=[
-            Dense(n_neurons_l1, 784, weight_init_scale=np.sqrt(2/784)),
-            ReLU(),
-            #Dropout(0.1),
-            Dense(n_neurons_l2, n_neurons_l1, weight_init_scale=np.sqrt(2/n_neurons_l1)),
-            ReLU(),
-            Dense(n_neurons_l3, n_neurons_l2, weight_init_scale=np.sqrt(2/n_neurons_l2)),
-            Sigmoid()
-        ], cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
-    nn.set_verbose(state=True)
+        Dense(n_neurons_l1, 784, weight_init_scale=np.sqrt(2/784)),
+        ReLU(),
+        #Dropout(0.1),
+        Dense(n_neurons_l2, n_neurons_l1, weight_init_scale=np.sqrt(2/n_neurons_l1)),
+        ReLU(),
+        Dense(n_neurons_l3, n_neurons_l2, weight_init_scale=np.sqrt(2/n_neurons_l2)),
+        Sigmoid()
+    ])
 
-    nn.train(X = X_train, Y = Y_train, epochs = 20, batch_size = 128, learning_rate=0.3)
+    adam = optimizer.Adam(nn)
+    trainer = Trainer(network=nn, optimizer=adam, learning_rate=0.001,  cost_function=fn.binary_cross_entropy, grad_function=fn.binary_cross_entropy_prime)
+    trainer.train(X = X_train, Y = Y_train, epochs = 20, batch_size = 128)
     #nn.graph_costs()
 
     # Run test set predictions

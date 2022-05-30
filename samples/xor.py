@@ -1,10 +1,9 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
+import redmind.optimizers as optimizer
 from redmind.layers import Dense, Sigmoid
 from redmind.network import NeuralNetwork
-import redmind.functions as fn
-import matplotlib.pyplot as plt
-
+from redmind.trainer import Trainer
 
 def main() -> None:
     # Prepare data
@@ -16,31 +15,30 @@ def main() -> None:
     y = np.array([0, 1, 1, 0]).reshape(1,4)
     x_test = xor.T
     
-    # Build NN object
+    # Build NN
     n_weights_1 = 10 # 3 neurons in the first layer
     n_weights_2 = 1 # 1 neuron in the second layer (output)
     nn = NeuralNetwork(layers=[
-            Dense(n_weights_1, x_test.shape[0]),
-            Sigmoid(),
-            Dense(n_weights_2, n_weights_1),
-            Sigmoid()
-        ], cost_function=fn.mse, 
-        grad_function=fn.mse_prime)
-    nn.set_verbose(True)
+        Dense(n_weights_1, x_test.shape[0], seed=1),
+        Sigmoid(),
+        Dense(n_weights_2, n_weights_1, seed=1),
+        Sigmoid()
+    ])
+    
+    adam = optimizer.Adam(nn)
+    trainer = Trainer(network=nn, optimizer=adam, learning_rate=0.01)
 
     # Train
-    #nn.train(X = x_test, Y = y, epochs = 1000, batch_size = 1, learning_rate=0.5)
+    trainer.train(X = x_test, Y = y, epochs = 600, batch_size = 1)
 
     # Predict
-    #prediction_vector = nn.predict(np.array([[0],[0]]))
-    # if prediction_vector > 0.5:
-    #     print(1)
-    # else:
-    #     print(0)
+    prediction_vector = nn.predict(np.array([[1],[0]]))
+    if prediction_vector > 0.5:
+        print(1)
+    else:
+        print(0)
 
-    #nn.details()
-    #nn.graph_costs()
-    #nn.grad_check(X = x_test, Y = y)
+    #trainer.graph_costs()
 
     # decision boundary plot
     points = []

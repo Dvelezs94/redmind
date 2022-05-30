@@ -10,13 +10,15 @@ Developed by Diego Velez 2022
 pip3 install redmind
 ```
 
-## Quickstart (XOR example)
+## Quickstart (XOR sample)
 
 ```python
 import numpy as np
+import redmind.optimizers as optimizer
+import redmind.functions as fn
 from redmind.layers import Dense, Sigmoid
 from redmind.network import NeuralNetwork
-import redmind.functions as fn
+from redmind.trainer import Trainer
 
 # Prepare data
 xor = np.array([[0, 0],
@@ -29,20 +31,23 @@ x_test = xor.T
 
 n_weights_1 = 3 # 3 neurons in the first layer
 n_weights_2 = 1 # 1 neuron in the second layer (output)
+# use seeds for consistency in results
 nn = NeuralNetwork(layers=[
-        Dense(n_weights_1, x_test.shape[0]),
-        Sigmoid(),
-        Dense(n_weights_2, n_weights_1),
-        Sigmoid()
-    ], cost_function=fn.mse, 
-    grad_function=fn.mse_prime)
-nn.set_verbose(True)
+    Dense(n_weights_1, x_test.shape[0], seed=1),
+    Sigmoid(),
+    Dense(n_weights_2, n_weights_1, seed=1),
+    Sigmoid()
+])
 
+# Prepare optimizer
+adam = optimizer.Adam(nn)
+# Create trainer object
+trainer = Trainer(network=nn, optimizer=adam, learning_rate=0.01)
 # Train
-nn.train(X = x_test, Y = y, epochs = 1000, batch_size = 4, learning_rate=0.5)
+trainer.train(X = x_test, Y = y, epochs = 600, batch_size = 1)
 
 # Predict
-prediction_vector = nn.predict(np.array([[0],[0]]))
+prediction_vector = nn.predict(np.array([[1],[0]]))
 if prediction_vector > 0.5:
     print(1)
 else:
@@ -50,6 +55,79 @@ else:
 ```
 
 Go to `samples` folder for more samples
+
+You can also opt to not use the `Trainer` class and manually train the network, here is how to do it
+
+### Manual Train (XOR sample)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+import redmind.optimizers as optimizer
+import redmind.functions as fn
+from redmind.layers import Dense, Sigmoid
+from redmind.network import NeuralNetwork
+from redmind.dataloader import Dataloader
+
+def main() -> None:
+    # Prepare data
+    xor = np.array([[0, 0],
+                    [0, 1],
+                    [1, 0],
+                    [1, 1]])
+    
+    y = np.array([0, 1, 1, 0]).reshape(1,4)
+    x_test = xor.T
+    
+    # Build NN
+    n_weights_1 = 10 # 3 neurons in the first layer
+    n_weights_2 = 1 # 1 neuron in the second layer (output)
+    nn = NeuralNetwork(layers=[
+        Dense(n_weights_1, x_test.shape[0], seed=1),
+        Sigmoid(),
+        Dense(n_weights_2, n_weights_1, seed=1),
+        Sigmoid()
+    ])
+
+    # Load data in dataloader so we can loop it
+    data = Dataloader(x_test, y)
+    
+    # training variables
+    learning_rate = 1e-2
+    epochs = 1000
+    costs = {}
+
+    # prepare optimizer
+    adam = optimizer.Adam(nn)
+    adam.set_learning_rate(learning_rate)
+
+    # Manual train
+    for epoch in range(epochs):
+        for x, y in data:
+            # forward
+            y_pred = nn.forward(x)
+            # calculate error and cost
+            cost = fn.mse(y, y_pred)
+            costs[epoch] = cost
+            error_gradient = fn.mse_prime(y, y_pred)
+            # backward
+            nn.backward(gradient=error_gradient)
+            # Optimize layers params
+            adam()
+        accuracy = round(100 - (costs[epoch] * 100), 3)
+        print(f"epoch: {epoch + 1}/{epochs}, cost: {round(costs[epoch], 4)}, accuracy: {accuracy}%")
+
+    # Predict
+    prediction_vector = nn.predict(np.array([[1],[0]]))
+    if prediction_vector > 0.5:
+        print(1)
+    else:
+        print(0)
+
+if __name__ == "__main__":
+    main()
+```
+
 
 ## Cost functions
 

@@ -5,21 +5,17 @@ import numpy as np
 from typing import List
 from abc import ABC, abstractmethod
 from redmind.layers import Layer
+from redmind.network import NeuralNetwork
 
 def init_velocity_vector(layers):
-    # hacky solution but works
-    # This is done because we initialize the optimizer at the same time we do
-    # for the layers. It would be possible to use this in the init if we
-    # used the optimizer outside the network, but I dont like that approach.
-    # this might need a refactor in the future
-    gradients_velocity = {}
+    velocity = {}
     # build layers velocity dict with np zeros array for each trainable pram
     for idx, layer in enumerate(layers):
         trainable_params = layer.get_trainable_params()
-        gradients_velocity[idx] = trainable_params
+        velocity[idx] = trainable_params
         for param, grads in trainable_params.items():
-            gradients_velocity[idx][param] = np.zeros(grads.shape)
-    return gradients_velocity
+            velocity[idx][param] = np.zeros(grads.shape)
+    return velocity
 
 class Optimizer(ABC):
     """
@@ -29,14 +25,15 @@ class Optimizer(ABC):
     variable states for all layers. Check Adam optimizer for reference.
 
     Optimizer workflow
-    1. Loop through self.layers
+    1. Loop through self.layers (coming from Neural Network)
     2. Fetch all trainable parameters
     3. Optimize those parameters according to strategy
     4. (optional) track optimization
     5. Update layer parameters on learning rate scale
     """
-    def set_layers(self, layers: List[Layer]) -> None:
-        self.layers = layers
+    def __init__(self, network: NeuralNetwork):
+        assert isinstance(network, NeuralNetwork), "network should be a NeuralNetwork object"
+        self.layers = network.layers
     
     def set_learning_rate(self, learning_rate: float) -> None:
         self.learning_rate = learning_rate
@@ -56,11 +53,12 @@ class GradientDescent(Optimizer):
 class Momentum(Optimizer):
     beta = 0.9
 
-    def __call__(self) -> None:
-        if not hasattr(self, 'gradients_velocity'):
-            self.gradients_velocity = init_velocity_vector(self.layers)
-        pass
+    def __init__(self, network: NeuralNetwork):
+        super().__init__(network)
+        self.gradients_velocity = init_velocity_vector(self.layers)
 
+
+    def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
             for param, grads in trainable_params.items():
@@ -72,11 +70,11 @@ class RMSprop(Optimizer):
     beta = 0.9
     epsilon = 1e-7
 
-    def __call__(self) -> None:
-        if not hasattr(self, 'gradients_velocity'):
-            self.gradients_velocity = init_velocity_vector(self.layers)
-        pass
+    def __init__(self, network: NeuralNetwork):
+        super().__init__(network)
+        self.gradients_velocity = init_velocity_vector(self.layers)
 
+    def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
             for param, grads in trainable_params.items():
@@ -90,12 +88,12 @@ class Adam(Optimizer):
     beta2 = 0.999
     epsilon = 1e-7
 
-    def __call__(self) -> None:
-        if not hasattr(self, 'rmsprop_velocity'):
-            self.momentum_velocity = init_velocity_vector(self.layers)
-            self.rmsprop_velocity = init_velocity_vector(self.layers)
-        pass
+    def __init__(self, network: NeuralNetwork):
+        super().__init__(network)
+        self.momentum_velocity = init_velocity_vector(self.layers)
+        self.rmsprop_velocity = init_velocity_vector(self.layers)
 
+    def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
             trainable_params = layer.get_trainable_params()
             for param, grads in trainable_params.items():
