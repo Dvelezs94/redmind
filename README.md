@@ -208,7 +208,7 @@ trainer = Trainer(network=nn, optimizer=myCustomOpt, learning_rate=1e-2)
 ## Save and Load Models
 
 You can also save and load your trained models, this makes easy for you to
-package, shit and use your models everywhere you want.
+package, ship and use your models everywhere you want.
 
 ### Save model
 ```python
