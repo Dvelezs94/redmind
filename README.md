@@ -168,8 +168,7 @@ The optimizer object expects the NeuralNetwork as argument, so it can read the n
 
 ```python
 import redmind.optimizers as optimizer
-from redmind.network import NeuralNetwork
-
+...
 nn = NuralNetwork(...)
 
 adam = optimizer.Adam(nn)
@@ -183,6 +182,7 @@ You can create your own optimizer and use that in the `Trainer` class, you just 
 
 ```python
 from redmind.optimizers import Optimizer, init_velocity_vector
+...
 
 class CustomOptimizer(Optimizer):
     # Optional __init__ method if you want to save states in the object 
