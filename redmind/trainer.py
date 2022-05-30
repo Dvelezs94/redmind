@@ -4,6 +4,7 @@ import redmind.functions as fn
 from redmind.network import NeuralNetwork
 from redmind.dataloader import Dataloader
 from redmind.optimizers import Optimizer
+from redmind.optimizers import GradientDescent
 
 
 class Trainer():
@@ -14,8 +15,10 @@ class Trainer():
     def __init__(self, network: NeuralNetwork, learning_rate: float = 1e-2, lr_decay_function = None, decay_rate: float = None, 
                 cost_function = fn.mse, grad_function = fn.mse_prime, optimizer: Optimizer = None):
         assert isinstance(network, NeuralNetwork), "network should be a NeuralNetwork object"
-        assert isinstance(optimizer, Optimizer), "optimizer should be an Optimizer object"
         self.network = network
+        if not optimizer:
+            optimizer = GradientDescent(self.network)
+        assert isinstance(optimizer, Optimizer), "optimizer should be an Optimizer object"
         self.learning_rate = learning_rate
         self.lr_decay_function = lr_decay_function
         self.decay_rate = decay_rate
