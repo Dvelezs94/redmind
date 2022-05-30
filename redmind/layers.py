@@ -64,8 +64,8 @@ class Dense(Layer):
             np.random.seed(seed)
         self.weights = np.random.randn(n_rows, n_columns) * weight_init_scale
         self.bias = np.random.randn(n_rows, 1)
-        self.bias_prime = None
-        self.weights_prime = None
+        self.bias_prime = np.zeros(self.bias.shape)
+        self.weights_prime = np.zeros(self.weights.shape)
         super().__init__()
 
     def __repr__(self):

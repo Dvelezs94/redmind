@@ -11,3 +11,10 @@ def binary_cross_entropy(y ,y_pred) -> np.float64:
 
 def binary_cross_entropy_prime(y, y_pred) -> np.ndarray:
     return ((1 - y) / (1 - y_pred) - y / y_pred) / np.size(y)
+
+#################################
+# Learning rate decay functions #
+#################################
+def lr_decay(learning_rate, epoch, decay_rate):
+    """Standard learning rate decay algorithm"""
+    return (1 / (1 + decay_rate * epoch)) * learning_rate
