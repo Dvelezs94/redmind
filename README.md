@@ -25,14 +25,14 @@ xor = np.array([[0, 0],
                 [1, 0],
                 [1, 1]])
 
-y = np.array([0, 1, 1, 0]).reshape(1,4)
-x_test = xor.T
+y_train = np.array([0, 1, 1, 0]).reshape(1,4)
+x_train = xor.T
 
 n_weights_1 = 3 # 3 neurons in the first layer
 n_weights_2 = 1 # 1 neuron in the second layer (output)
 # use seeds for consistency in results
 nn = NeuralNetwork(layers=[
-    Dense(n_weights_1, x_test.shape[0], seed=1),
+    Dense(n_weights_1, x_train.shape[0], seed=1),
     Sigmoid(),
     Dense(n_weights_2, n_weights_1, seed=1),
     Sigmoid()
@@ -41,7 +41,7 @@ nn = NeuralNetwork(layers=[
 # Create trainer object
 trainer = Trainer(network=nn, learning_rate=0.01)
 # Train
-trainer.train(X = x_test, Y = y, epochs = 600, batch_size = 1)
+trainer.train(X = x_train, Y = y_train, epochs = 600, batch_size = 1)
 
 # Predict
 prediction_vector = nn.predict(np.array([[1],[0]]))
