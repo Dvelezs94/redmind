@@ -2,7 +2,6 @@
 Neural network optimizers
 """
 import numpy as np
-from typing import List
 from abc import ABC, abstractmethod
 from redmind.layers import Layer
 from redmind.network import NeuralNetwork
