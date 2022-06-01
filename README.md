@@ -192,7 +192,7 @@ class CustomOptimizer(Optimizer):
 
     def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
-            trainable_params = layer.get_trainable_params()
+            trainable_params = layer.get_trainable_params_gradients()
             for param, grads in trainable_params.items():
                 # Run your computations for each layer trainable params
                 ...
@@ -261,10 +261,9 @@ trainer.train(X = x_test, Y = y, epochs = 600, batch_size = 1)
 - [X] Train and predict fully working
 - [X] Add Optimization layers
 - [X] Add mini batch Gradient descent (through Dataloader)
-- [ ] Add Gradient checking
 - [X] Support for multiple optimizers
 - [X] Learning rate decay
 - [X] Add early stoping support
 - [X] Save and Load models
+- [ ] Batch normalization
 - [ ] Add convolutional layers
-- [ ] Add native pyplot support

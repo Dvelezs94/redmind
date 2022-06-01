@@ -132,5 +132,7 @@ dmypy.json
 datasets/
 
 # test files
-test_redmind.py
+*_test.py
+
+# NN model saves
 *.dill
