@@ -69,7 +69,11 @@ class Trainer():
         plt.show()
 
     def grad_check(self, X: np.ndarray = None, Y: np.ndarray = None, epsilon=1e-7):
-        """Performs gradient checking on the given NN"""
+        """
+        Performs gradient checking on the given NN
+        It is recommended to input X and Y with few elements since grad check differences
+        can add up and give you high difference margin.
+        """
         # Helper functions for grad check
         def params_to_vector(params: Dict[int, np.ndarray]) -> np.ndarray:
             """Converts layers parameters to a row vector"""
@@ -107,8 +111,6 @@ class Trainer():
                     layer.__dict__[k] = v
         
         print("Starting gradient checking")
-        # Prepare data and get random element
-
         # compute NN gradients through forward and backward pass
         y_pred = self.network.forward(X)
         error_gradient = self.grad_function(Y, y_pred)
@@ -120,7 +122,9 @@ class Trainer():
         for idx, layer in enumerate(self.network.layers):
             gradients[idx] = layer.get_trainable_params_gradients()
         
-        flattened_gradients = params_to_vector(gradients) / Y.shape[1]
+        # If you are using mini batches then you need to divide the gradients by the number of samples
+        # This is not proven, but it worked for me, I might need to research further
+        flattened_gradients = params_to_vector(gradients)
         ###
         # get original params for each layer and flatten in single row vector
         ###
