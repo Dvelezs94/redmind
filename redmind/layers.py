@@ -38,8 +38,15 @@ class Layer(ABC):
         """Returns a dictionary of all trainable parameters by the layer"""
         return {}
 
+    def get_trainable_params_gradients(self) -> Dict[str, np.ndarray]:
+        """
+        Returns a dictionary of all trainable parameters GRADIENTS by the layer
+        This is mainly used by the optimizer
+        """
+        return {}
+
     def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
-        """Update trainable params. Order of optimized_params is the same as get_trainable_params"""
+        """Update trainable params. Order of optimized_params is the same as get_trainable_params_gradients"""
         pass
 
     def get_train(self):
@@ -69,7 +76,8 @@ class Dense(Layer):
         super().__init__()
 
     def __repr__(self):
-        fields = {'weights': self.weights, 'bias': self.bias}
+        fields = {'weights': self.weights, 'bias': self.bias, 
+                'weights_prime': self.weights_prime, 'bias_prime': self.bias_prime}
         return super().__repr__(extra_fields = fields)
 
     def forward(self, x: np.ndarray) -> np.ndarray:
@@ -86,6 +94,9 @@ class Dense(Layer):
         return self.backward_outputs
 
     def get_trainable_params(self) -> Dict[str, np.ndarray]:
+        return {'weights': self.weights, 'bias': self.bias}
+
+    def get_trainable_params_gradients(self) -> Dict[str, np.ndarray]:
         return {'weights_prime': self.weights_prime, 'bias_prime': self.bias_prime}
 
     def update_trainable_params(self, optimized_params: Dict[str, np.ndarray]) -> None:
@@ -118,9 +129,9 @@ class Dropout(Layer):
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
 
-###################
-# Activation Layers
-###################
+####################
+# Activation Layer #
+####################
 
 class ActivationLayer(Layer):
     def __init__(self, activation, activation_prime) -> None:
@@ -135,7 +146,7 @@ class ActivationLayer(Layer):
 
     def backward(self, output_gradient: float) -> np.ndarray:
         self.backward_inputs = output_gradient
-        self.backward_outputs = self.backward_inputs * self.activation_prime(self.forward_inputs)
+        self.backward_outputs = np.multiply(self.backward_inputs, self.activation_prime(self.forward_inputs))
         return self.backward_outputs
 
 class Sigmoid(ActivationLayer):
@@ -149,3 +160,23 @@ class ReLU(ActivationLayer):
         relu = lambda x: np.maximum(0, x)
         relu_prime = lambda x: (x>0).astype(x.dtype)
         super().__init__(relu, relu_prime)
+
+# softmax is a bit different from other activations,
+# its more like a fully connected since it depends on all
+# the input variables to compute the sum to create the
+# probability distribution which adds up to 1.
+# thats why it receives a different treatment and inherits
+# directoly from the Layer superclass
+class Softmax(Layer):
+    def forward(self, x) -> np.ndarray:
+        self.forward_inputs = x
+        input_stable = np.exp(x - np.max(x, axis=0))
+        self.forward_outputs =  input_stable / input_stable.sum(axis=0)
+        return self.forward_outputs
+    
+    def backward(self, output_gradient: float) -> np.ndarray:
+        self.backward_inputs = output_gradient
+        tmp = np.sum(self.backward_inputs * self.forward_outputs, axis = 0)
+        self.backward_outputs = self.forward_outputs * (self.backward_inputs - tmp)
+        return self.backward_outputs
+        

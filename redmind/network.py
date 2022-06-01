@@ -9,9 +9,8 @@ class NeuralNetwork:
         if self._verbose:
             print(f"Neural Network initialized with {len(self.layers)} layers")
 
-    def details(self) -> None:
-        for index, layer in enumerate(self.layers):
-            print(f"Layer {index + 1} {layer}")
+    def __repr__(self):
+        return f"NeuralNetwork(layers={self.layers})"
 
     def forward(self, x: np.ndarray = None) -> np.ndarray:
         out = x

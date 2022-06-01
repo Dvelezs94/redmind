@@ -10,7 +10,7 @@ def init_velocity_vector(layers):
     velocity = {}
     # build layers velocity dict with np zeros array for each trainable pram
     for idx, layer in enumerate(layers):
-        trainable_params = layer.get_trainable_params()
+        trainable_params = layer.get_trainable_params_gradients()
         velocity[idx] = trainable_params
         for param, grads in trainable_params.items():
             velocity[idx][param] = np.zeros(grads.shape)
@@ -44,7 +44,7 @@ class Optimizer(ABC):
 class GradientDescent(Optimizer):
     def __call__(self) -> None:
         for layer in self.layers:
-            trainable_params = layer.get_trainable_params()
+            trainable_params = layer.get_trainable_params_gradients()
             for param, grads in trainable_params.items():
                 trainable_params[param] = grads * self.learning_rate
             layer.update_trainable_params(trainable_params)
@@ -59,7 +59,7 @@ class Momentum(Optimizer):
 
     def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
-            trainable_params = layer.get_trainable_params()
+            trainable_params = layer.get_trainable_params_gradients()
             for param, grads in trainable_params.items():
                 self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * grads
                 trainable_params[param] = self.gradients_velocity[idx][param] * self.learning_rate
@@ -75,7 +75,7 @@ class RMSprop(Optimizer):
 
     def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
-            trainable_params = layer.get_trainable_params()
+            trainable_params = layer.get_trainable_params_gradients()
             for param, grads in trainable_params.items():
                 self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * np.power(grads, 2)
                 trainable_params[param] = (grads / np.sqrt(self.gradients_velocity[idx][param] + self.epsilon)) * self.learning_rate
@@ -94,7 +94,7 @@ class Adam(Optimizer):
 
     def __call__(self) -> None:
         for idx, layer in enumerate(self.layers):
-            trainable_params = layer.get_trainable_params()
+            trainable_params = layer.get_trainable_params_gradients()
             for param, grads in trainable_params.items():
                 self.momentum_velocity[idx][param] = ((self.beta1 * self.momentum_velocity[idx][param]) + ((1 - self.beta1) * grads)) 
                 self.rmsprop_velocity[idx][param] = ((self.beta2 * self.rmsprop_velocity[idx][param]) + ((1 - self.beta2) * np.power(grads, 2)))

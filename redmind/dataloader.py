@@ -60,9 +60,9 @@ class Dataloader():
         """
         Returns a single random element with its features and label
         """
-        elem = random.randint(0, len(self))
+        elem = random.randint(0, len(self)-1)
         x = self.X[:, elem].reshape(self.X.shape[0], 1)
-        y = self.Y[:, elem]
+        y = self.Y[:, elem].reshape(self.Y.shape[0], 1)
         return x, y
 
     def shuffle(self) -> None:
