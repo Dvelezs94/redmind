@@ -135,23 +135,17 @@ class Trainer():
         numgrad = np.zeros(flattened_params.shape)
         preturb = np.zeros(numgrad.shape)
 
-        # print("====ORIGINAL====")
-        # print(self.network.layers[0].get_trainable_params())
         for i in range(numgrad.size):
             preturb[i] = epsilon
             # convert params vector plus epsilon
             plus_params = vector_to_params(vector = flattened_params + preturb, layer_params = original_params)
             update_layer_params(plus_params)
-            # print("====PLUS EPSILON====")
-            # print(self.network.layers[0].get_trainable_params())
             y_plus = self.network.forward(X)
             loss_plus = self.cost_function(Y, y_plus)
 
             # convert params vector minus epsilon
             minus_params = vector_to_params(vector = flattened_params - preturb, layer_params = original_params)
             update_layer_params(minus_params)
-            # print("====MINUS EPSILON====")
-            # print(self.network.layers[0].get_trainable_params())
             y_minus = self.network.forward(X)
             loss_minus = self.cost_function(Y, y_minus)
             # compute the gradient
@@ -166,12 +160,3 @@ class Trainer():
             print ("\033[93m" + "There is a mistake in the backward propagation! difference = " + str(difference) + "\033[0m")
         else:
             print ("\033[92m" + "Your backward propagation works perfectly fine! difference = " + str(difference) + "\033[0m")
-        print(flattened_gradients)
-        print(numgrad)
-
-        plt.plot(flattened_gradients)
-        plt.plot(numgrad)
-        plt.legend(["gradients", "numgrad"])
-        plt.xlabel("i")
-        plt.ylabel("val")
-        plt.show()
