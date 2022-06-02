@@ -253,6 +253,85 @@ trainer = Trainer(network=nn, learning_rate=0.01, lr_decay_function = lr_decay, 
 trainer.train(X = x_test, Y = y, epochs = 600, batch_size = 1)
 ```
 
+## Preprocessing
+
+Redmind also has a few handy preprocessing tools. These are tools to make your life a bit easier to handle data
+
+### Normalizer
+
+In case the features of your data have very high variance or are scaled in different way, normalizing makes it
+fit between 0 and 1 (mostly). This is very useful to make your model train faster and avoid exploding gradients
+
+Usage:
+
+```python
+import numpy as np
+from redmind.normalizer import Normalizer
+
+# column 1 Age
+# Column 2 Weight
+xtrain = np.array([[10, 40],
+              [11, 35],
+              [12, 40],
+              [13, 41],
+              [13, 70],
+              [15, 60],
+              [19, 64],
+              [15, 60],
+              [20, 80],
+              [40, 100],
+              [56, 85]])
+
+# Initialize normalizer and fit the data
+norm = Normalizer()
+norm.fit(xtrain)
+
+# scale xtrain
+xtrain = norm.scale(xtrain)
+
+xtest = np.array([[20, 60],
+                [21, 75],
+                [22, 80],
+                [23, 59],
+                [23, 85],
+                [25, 77]])
+
+# no need to refit the normalizer for new data
+# You need to use the same scale 
+xnorm = norm.scale(xtest)
+```
+
+### Dataloader
+
+The dataloader is a useful tool to loop through the trainig examples and its labels.
+It can also split your data in mini-batches very easily.
+
+`Note: Make sure your data is entered as column vectors`
+
+```python
+from redmind.dataloader import Dataloader
+
+xor = np.array([[0, 0],
+                [0, 1],
+                [1, 0],
+                [1, 1]])
+
+y_train = np.array([0, 1, 1, 0]).reshape(1,4)
+# we need to input data as column vectors to dataloader
+x_train = xor.T
+
+data = Dataloader(X=X, Y=Y, batch_size=2)
+
+# then we can loop over the mini-batches
+# you can do forward and backpropagation like this
+for x, y in data:
+    print(x)
+    print(y)
+    #forward..
+    ...
+```
+
+
 ## Features
 
 - [X] Classes definition and construction
