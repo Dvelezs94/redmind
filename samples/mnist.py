@@ -56,7 +56,7 @@ def main() -> None:
 
     adam = optimizer.Adam(nn)
     trainer = Trainer(network=nn, optimizer=adam, learning_rate=0.001,  cost_function=fn.cross_entropy, grad_function=fn.cross_entropy_prime)
-    trainer.train(X = X_train, Y = Y_train, epochs = 20, batch_size = 64)
+    trainer.train(X = X_train, Y = Y_train, epochs = 5, batch_size = 64)
     trainer.graph_costs()
 
     # Run test set predictions
@@ -64,7 +64,7 @@ def main() -> None:
     train_cost = fn.binary_cross_entropy(Y_train, predictions)
     print(f"Test set cost: {train_cost}, accuracy: {round(100 - (train_cost * 100), 4)}%")
     
-    # # predict a random image
+    # predict a random image
     test_data = Dataloader(X_test, Y_test)
     rand_x, rand_y = test_data.get_random_element()
     prediction = nn.predict(rand_x.reshape(784,1))

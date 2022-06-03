@@ -133,6 +133,7 @@ datasets/
 
 # test files
 *_test.py
+*_test.ipynb
 
 # NN model saves
 *.dill
