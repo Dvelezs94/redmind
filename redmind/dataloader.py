@@ -4,12 +4,19 @@ import math
 
 class Dataloader():
     """
-    Dataloader class utilized to create iterable lists of labeled numpy matrices
+    Dataloader class utilized to create iterable lists of labeled matrices
+    Dataloader works with both numpy matrices and pytorch tensors
     
     Each iteration on the dataloader object returns a matrix containing 
     features and labeled outputs for those features
 
     Warning: Make sure you input both X and Y as column vectors
+    
+    Usage: 
+    train_data = Dataloader(X_train, Y_train, batch_size=64)
+    
+    for x, y in train_data:
+        print("X: ", X, "Y: ", Y)
     """
     def __init__(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1):
         """
@@ -50,8 +57,6 @@ class Dataloader():
         """
         Runs input data validations
         """
-        assert type(self.X) == np.ndarray, "X is not a numpy array"
-        assert type(self.Y) == np.ndarray, "Y is not a numpy array"
         assert self.X.shape[1] == self.Y.shape[1], "X and Y do not have the same number of columns/items"
         assert type(self.batch_size) == int, "batch_size should be integer value"
         assert math.floor(self.X.shape[1] / self.batch_size) >= 1, f"X matrix is not divisible by {self.batch_size}. Enter a valid batch size"

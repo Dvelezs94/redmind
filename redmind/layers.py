@@ -129,8 +129,15 @@ class Dropout(Layer):
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
     
-class BatchNormalization(Layer):
-    pass
+# class BatchNormalization(Layer):
+#     def __init__(self, n_rows: int = None, n_columns: int = None, weight_init_scale = 0.1, seed: int = None) -> None:
+#         if seed:
+#             np.random.seed(seed)
+#         self.gamma = np.random.randn(n_rows, n_columns) * weight_init_scale
+#         self.beta = np.random.randn(n_rows, 1)
+#         self.gamma_prime = np.zeros(self.bias.shape)
+#         self.beta_prime = np.zeros(self.weights.shape)
+#         super().__init__()
 
 ####################
 # Activation Layer #
