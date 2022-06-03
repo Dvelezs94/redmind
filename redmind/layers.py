@@ -128,6 +128,9 @@ class Dropout(Layer):
         self.backward_inputs = output_gradient
         self.backward_outputs = np.multiply(self.drop_matrix, output_gradient) / self.keep_prob
         return self.backward_outputs
+    
+class BatchNormalization(Layer):
+    pass
 
 ####################
 # Activation Layer #
