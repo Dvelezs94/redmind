@@ -4,10 +4,10 @@ import torch
 
 class Dataloader():
     """
-    Dataloader class utilized to create iterable lists of labeled matrices
+    Dataloader class utilized to create iterable lists of labeled tensors
     Dataloader works with pytorch tensors
     
-    Each iteration on the dataloader object returns a matrix containing 
+    Each iteration on the dataloader object returns a tensor containing 
     features and labeled outputs for those features
 
     Warning: Make sure you input both X and Y as column vectors
@@ -22,8 +22,8 @@ class Dataloader():
         """
         inputs
         ---
-        X: Matrix of features X as column vectors
-        Y: Output labels Y as column vectors
+        X: Tensor of features as column vectors
+        Y: Tensor of Output labels as column vectors
         batch_size: number of elements per batch. Defaults to 1
         """
         self.X = X
@@ -59,7 +59,7 @@ class Dataloader():
         """
         assert self.X.shape[1] == self.Y.shape[1], "X and Y do not have the same number of columns/items"
         assert type(self.batch_size) == int, "batch_size should be integer value"
-        assert math.floor(self.X.shape[1] / self.batch_size) >= 1, f"X matrix is not divisible by {self.batch_size}. Enter a valid batch size"
+        assert math.floor(self.X.shape[1] / self.batch_size) >= 1, f"X tensor is not divisible by {self.batch_size}. Enter a valid batch size"
     
     def get_random_element(self):
         """

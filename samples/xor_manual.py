@@ -4,6 +4,7 @@ from redmind.layers import Dense, Sigmoid, ReLU
 from redmind.network import NeuralNetwork
 from redmind.dataloader import Dataloader
 from redmind.loss import BinaryCrossEntropyLoss
+from redmind.trainer import Trainer
 import torch
 
 def main() -> None:
@@ -14,10 +15,12 @@ def main() -> None:
                     [1, 1]], dtype=torch.float32)
     
     y = torch.tensor([0, 1, 1, 0], dtype=torch.float32).reshape(1,4)
+    # xor = torch.tensor([[0,1]], dtype=torch.float32)
+    # y = torch.tensor([1], dtype=torch.float32).reshape(1,1)
     x_test = xor.T
     
     # Build NN
-    n_weights_1 = 10 # 3 neurons in the first layer
+    n_weights_1 = 3 # 3 neurons in the first layer
     n_weights_2 = 1 # 1 neuron in the second layer (output)
     nn = NeuralNetwork(layers=[
         Dense(n_weights_1, x_test.shape[0], seed=1),
@@ -25,47 +28,17 @@ def main() -> None:
         Dense(n_weights_2, n_weights_1, seed=1),
         Sigmoid()
     ])
-
-    # Load data in dataloader so we can loop it
-    data = Dataloader(x_test, y, batch_size=2)
     
     # training variables
     learning_rate = 1e-1
-    epochs = 600
-    costs = {}
+    epochs = 100
     loss_fn = BinaryCrossEntropyLoss()
-    optimizer = optim.GradientDescent(nn.layers_parameters(), learning_rate=learning_rate)
+    optimizer = optim.RMSprop(nn.layers_parameters(), learning_rate=learning_rate)
+    # Initialize trainer
+    trainer = Trainer(network=nn, loss_function=loss_fn,optimizer=optimizer)
 
-    # Manual train
-    for epoch in range(epochs):
-        epoch_losses = []
-        for x, y in data:
-            # forward
-            y_pred = nn.forward(x)
-
-            # clear gradients
-            optimizer.zero_grad()
-
-            # calculate loss
-            loss = loss_fn(y, y_pred)
-            epoch_losses.append(loss.detach())
-            loss.backward()
-            
-            # Gradient descent step
-            optimizer.step()
-
-        # Calculate total run cost
-        costs[epoch] = torch.stack(epoch_losses).mean().item()
-        accuracy = round(100 - (costs[epoch] * 100), 3)
-        print(f"epoch: {epoch + 1}/{epochs}, cost: {round(costs[epoch], 4)}, accuracy: {accuracy}%")
-
-    def graph_costs() -> None:
-        plt.plot(list(costs.keys()), list(costs.values()))
-        plt.xlabel("Epoch")
-        plt.ylabel("Cost")
-        plt.show()
-    
-    # graph_costs()
+    # Train
+    trainer.train(X = x_test, Y = y, epochs = epochs, batch_size = 1)
 
     # Predict
     prediction_vector = nn.predict(torch.tensor([[1.],[0.]]))

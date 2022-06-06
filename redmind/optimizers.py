@@ -71,14 +71,6 @@ class Momentum(Optimizer):
                 with torch.no_grad():
                     layer[param_name] -= direction
 
-                    
-        # for idx, layer in enumerate(self.params):
-        #     trainable_params = layer.get_trainable_params_gradients()
-        #     for param, grads in trainable_params.items():
-        #         self.gradients_velocity[idx][param] = self.beta * self.gradients_velocity[idx][param] + (1 - self.beta) * grads
-        #         trainable_params[param] = self.gradients_velocity[idx][param] * self.learning_rate
-        #     layer.update_trainable_params(trainable_params)
-
 class RMSprop(Optimizer):
     beta: float
     epsilon: float = 1e-7
@@ -99,25 +91,27 @@ class RMSprop(Optimizer):
                 with torch.no_grad():
                     layer[param_name] -= direction
 
-class Adam(Optimizer):
-    """Adam is a combination of momentum and RMSprop, thats why the velocity names"""
-    beta1 = 0.9
-    beta2 = 0.999
-    epsilon = 1e-7
 
-    def __init__(self, layers_params: list[dict[str, torch.Tensor]], learning_rate = 1e-2):
-        super().__init__(layers_params, learning_rate)
-        self.momentum_velocity = init_velocity_vector(self.params)
-        self.rmsprop_velocity = init_velocity_vector(self.params)
+### Pending to fix
+# class Adam(Optimizer):
+#     """Adam is a combination of momentum and RMSprop, thats why the velocity names"""
+#     beta1 = 0.9
+#     beta2 = 0.999
+#     epsilon = 1e-7
 
-    def step(self) -> None:
-        for idx, layer in enumerate(self.params):
-            for param_name, param_value in layer.items():
-                self.momentum_velocity[idx][param_name] = self.beta1 * self.momentum_velocity[idx][param_name] + (1 - self.beta1) * param_value.grad
-                self.rmsprop_velocity[idx][param_name] = self.beta2 * self.rmsprop_velocity[idx][param_name] + (1 - self.beta2) * torch.pow(param_value.grad, 2)
-                direction = (self.momentum_velocity[idx][param_name] / torch.sqrt(self.rmsprop_velocity[idx][param_name] + self.epsilon)) * self.learning_rate
-                # Running in place operation with context manager
-                # because we dont need to track this operation
-                with torch.no_grad():
-                    layer[param_name] -= direction
+#     def __init__(self, layers_params: list[dict[str, torch.Tensor]], learning_rate = 1e-2):
+#         super().__init__(layers_params, learning_rate)
+#         self.momentum_velocity = init_velocity_vector(self.params)
+#         self.rmsprop_velocity = init_velocity_vector(self.params)
+
+#     def step(self) -> None:
+#         for idx, layer in enumerate(self.params):
+#             for param_name, param_value in layer.items():
+#                 self.momentum_velocity[idx][param_name] = self.beta1 * self.momentum_velocity[idx][param_name] + (1 - self.beta1) * param_value.grad
+#                 self.rmsprop_velocity[idx][param_name] = self.beta2 * self.rmsprop_velocity[idx][param_name] + (1 - self.beta2) * torch.pow(param_value.grad, 2)
+#                 direction = (self.momentum_velocity[idx][param_name] / torch.sqrt(self.rmsprop_velocity[idx][param_name] + self.epsilon)) * self.learning_rate
+#                 # Running in place operation with context manager
+#                 # because we dont need to track this operation
+#                 with torch.no_grad():
+#                     layer[param_name] -= direction
 

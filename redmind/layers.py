@@ -2,7 +2,6 @@ import numpy as np
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import torch
-from typing import Dict
 
 @dataclass
 class Layer(ABC):
@@ -16,7 +15,7 @@ class Layer(ABC):
     inputs: torch.Tensor
     outputs: torch.Tensor
 
-    def __init__(self, parameters: Dict[str, torch.Tensor] = {}) -> None:
+    def __init__(self, parameters: dict[str, torch.Tensor] = {}) -> None:
         self.inputs = None
         self.outputs = None
         self.parameters = parameters
@@ -27,7 +26,7 @@ class Layer(ABC):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         pass
 
-    def get_params(self) -> Dict[str, torch.Tensor]:
+    def get_params(self) -> dict[str, torch.Tensor]:
         """Returns a dictionary of all trainable parameters by the layer"""
         return self.parameters
 
@@ -46,7 +45,7 @@ class Layer(ABC):
         self._freeze = state
 
 class Dense(Layer):
-    def __init__(self, in_size: int = None, out_size: int = None, weight_init_scale = 0.1, seed: int = 0) -> None:
+    def __init__(self, in_size: int, out_size: int, weight_init_scale = 0.1, seed: int = 0) -> None:
         if seed:
             torch.random.manual_seed(seed)
         self.weights = torch.rand(in_size, out_size, dtype=torch.float32, requires_grad=True)
