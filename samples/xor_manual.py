@@ -14,12 +14,10 @@ def main() -> None:
                     [1, 1]], dtype=torch.float32)
     
     y = torch.tensor([0, 1, 1, 0], dtype=torch.float32).reshape(1,4)
-    # xor = torch.tensor([[0,1]], dtype=torch.float32)
-    # y = torch.tensor([1], dtype=torch.float32).reshape(1,1)
     x_test = xor.T
     
     # Build NN
-    n_weights_1 = 3 # 3 neurons in the first layer
+    n_weights_1 = 10 # 3 neurons in the first layer
     n_weights_2 = 1 # 1 neuron in the second layer (output)
     nn = NeuralNetwork(layers=[
         Dense(n_weights_1, x_test.shape[0], seed=1),

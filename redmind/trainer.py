@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import redmind.functions as fn
-from typing import List, Dict
 from redmind.network import NeuralNetwork
 from redmind.layers import Layer
 from redmind.dataloader import Dataloader

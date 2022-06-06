@@ -1,13 +1,12 @@
-from typing import List
 from redmind.layers import Layer
 from dataclasses import dataclass
 import torch
 
 @dataclass
 class NeuralNetwork:
-    layers: List[Layer]
+    layers: list[Layer]
 
-    def __init__(self, layers: List[Layer] = [], verbose=False) -> None:
+    def __init__(self, layers: list[Layer] = [], verbose=False) -> None:
         self.layers = layers
         self._verbose = verbose
         if self._verbose:
