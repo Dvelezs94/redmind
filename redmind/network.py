@@ -1,34 +1,17 @@
-import numpy as np
 from typing import List
 from redmind.layers import Layer
+from dataclasses import dataclass
+import torch
 
+@dataclass
 class NeuralNetwork:
-    def __init__(self, layers: List[Layer], verbose=False) -> None:
+    layers: List[Layer]
+
+    def __init__(self, layers: List[Layer] = [], verbose=False) -> None:
         self.layers = layers
         self._verbose = verbose
         if self._verbose:
             print(f"Neural Network initialized with {len(self.layers)} layers")
-
-    def __repr__(self):
-        return f"NeuralNetwork(layers={self.layers})"
-
-    def forward(self, x: np.ndarray = None) -> np.ndarray:
-        out = x
-        for layer in self.layers:
-            out = layer.forward(out)
-        return out
-
-    def backward(self, gradient: float = None) -> None:
-        grad = gradient
-        for layer in reversed(self.layers):
-            grad = layer.backward(output_gradient=grad)
-        return None
-
-    def predict(self, x: np.ndarray = None) -> np.ndarray:
-        """
-        Same as forward, its just used for convention
-        """
-        return self.forward(x)
 
     def set_train(self, state=False):
         """
@@ -40,9 +23,24 @@ class NeuralNetwork:
             print(f"updating NN layers training to: {state}")
         for layer in self.layers:
             layer.set_train(state=state)
+    
+    def layers_parameters(self):
+        return [p.get_params() for p in self.layers]
 
     def set_verbose(self, state):
         assert type(state) == bool
         self._verbose = state
+
+    def forward(self, x: torch.Tensor = None) -> torch.Tensor:
+        out = x
+        for layer in self.layers:
+            out = layer.forward(out)
+        return out
+
+    def predict(self, x: torch.Tensor = None) -> torch.Tensor:
+        """
+        Same as forward, its just used for convention
+        """
+        return self.forward(x)
 
 

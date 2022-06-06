@@ -1,11 +1,11 @@
-import numpy as np
 import random
 import math
+import torch
 
 class Dataloader():
     """
     Dataloader class utilized to create iterable lists of labeled matrices
-    Dataloader works with both numpy matrices and pytorch tensors
+    Dataloader works with pytorch tensors
     
     Each iteration on the dataloader object returns a matrix containing 
     features and labeled outputs for those features
@@ -18,7 +18,7 @@ class Dataloader():
     for x, y in train_data:
         print("X: ", X, "Y: ", Y)
     """
-    def __init__(self, X: np.ndarray, Y: np.ndarray, batch_size: int = 1):
+    def __init__(self, X: torch.Tensor, Y: torch.Tensor, batch_size: int = 1):
         """
         inputs
         ---
