@@ -110,12 +110,7 @@ class ReLU(ActivationLayer):
         relu = lambda x: torch.maximum(x, torch.zeros(x.shape))
         super().__init__(relu)
 
-# softmax is a bit different from other activations,
-# its more like a fully connected since it depends on all
-# the input variables to compute the sum to create the
-# probability distribution which adds up to 1.
-# thats why it receives a different treatment and inherits
-# directoly from the Layer superclass
+
 class Softmax(Layer):
     def forward(self, x) -> torch.Tensor:
         self.inputs = x
