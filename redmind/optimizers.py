@@ -93,25 +93,25 @@ class RMSprop(Optimizer):
 
 
 ### Pending to fix
-# class Adam(Optimizer):
-#     """Adam is a combination of momentum and RMSprop, thats why the velocity names"""
-#     beta1 = 0.9
-#     beta2 = 0.999
-#     epsilon = 1e-7
+class Adam(Optimizer):
+    """Adam is a combination of momentum and RMSprop, thats why the velocity names"""
+    beta1 = 0.9
+    beta2 = 0.999
+    epsilon = 1e-7
 
-#     def __init__(self, layers_params: list[dict[str, torch.Tensor]], learning_rate = 1e-2):
-#         super().__init__(layers_params, learning_rate)
-#         self.momentum_velocity = init_velocity_vector(self.params)
-#         self.rmsprop_velocity = init_velocity_vector(self.params)
+    def __init__(self, layers_params: list[dict[str, torch.Tensor]], learning_rate = 1e-2):
+        super().__init__(layers_params, learning_rate)
+        self.momentum_velocity = init_velocity_vector(self.params)
+        self.rmsprop_velocity = init_velocity_vector(self.params)
 
-#     def step(self) -> None:
-#         for idx, layer in enumerate(self.params):
-#             for param_name, param_value in layer.items():
-#                 self.momentum_velocity[idx][param_name] = self.beta1 * self.momentum_velocity[idx][param_name] + (1 - self.beta1) * param_value.grad
-#                 self.rmsprop_velocity[idx][param_name] = self.beta2 * self.rmsprop_velocity[idx][param_name] + (1 - self.beta2) * torch.pow(param_value.grad, 2)
-#                 direction = (self.momentum_velocity[idx][param_name] / torch.sqrt(self.rmsprop_velocity[idx][param_name] + self.epsilon)) * self.learning_rate
-#                 # Running in place operation with context manager
-#                 # because we dont need to track this operation
-#                 with torch.no_grad():
-#                     layer[param_name] -= direction
+    def step(self) -> None:
+        for idx, layer in enumerate(self.params):
+            for param_name, param_value in layer.items():
+                self.momentum_velocity[idx][param_name] = (self.beta1 * self.momentum_velocity[idx][param_name]) + ((1 - self.beta1) * param_value.grad)
+                self.rmsprop_velocity[idx][param_name] = (self.beta2 * self.rmsprop_velocity[idx][param_name]) + ((1 - self.beta2) * torch.pow(param_value.grad, 2))
+                direction = (self.momentum_velocity[idx][param_name] / torch.sqrt(self.rmsprop_velocity[idx][param_name] + self.epsilon)) * self.learning_rate
+                # Running in place operation with context manager
+                # because we dont need to track this operation
+                with torch.no_grad():
+                    layer[param_name] -= direction
 

@@ -114,7 +114,7 @@ class ReLU(ActivationLayer):
 class Softmax(Layer):
     def forward(self, x) -> torch.Tensor:
         self.inputs = x
-        input_stable = torch.exp(x - torch.max(x, axis=0))
+        input_stable = torch.exp(x - x.max(axis=0).values)
         self.outputs = input_stable / input_stable.sum(axis=0)
         return self.outputs
         
